@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A670CF41-AEE9-4D6A-9102-2DBAB2FA3245}"
 EndProject
@@ -24,10 +24,6 @@ EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Rnx.Tasks.Core", "src\Rnx.Tasks.Core\Rnx.Tasks.Core.xproj", "{ED16AB29-B32C-4F9F-A3A0-10B7D9396DAE}"
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Rnx.Tasks.Core.Tests", "test\Rnx.Tasks.Core.Tests\Rnx.Tasks.Core.Tests.xproj", "{C30D2EC9-72A9-4DEC-ADFA-3F751498D86A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{E18ED5D5-3875-47E1-A443-C47104F14DD3}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "ExperimentalPlayground", "examples\ExperimentalPlayground\ExperimentalPlayground.xproj", "{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -59,10 +55,6 @@ Global
 		{C30D2EC9-72A9-4DEC-ADFA-3F751498D86A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C30D2EC9-72A9-4DEC-ADFA-3F751498D86A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C30D2EC9-72A9-4DEC-ADFA-3F751498D86A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -74,6 +66,5 @@ Global
 		{D914EC59-9577-4FC5-9C8C-36B814A47B1A} = {4E7A7883-50EB-473C-A740-DF545A1E92A5}
 		{ED16AB29-B32C-4F9F-A3A0-10B7D9396DAE} = {A670CF41-AEE9-4D6A-9102-2DBAB2FA3245}
 		{C30D2EC9-72A9-4DEC-ADFA-3F751498D86A} = {4E7A7883-50EB-473C-A740-DF545A1E92A5}
-		{B021C581-DCD0-4BB5-BAB0-F78E42E1EF00} = {E18ED5D5-3875-47E1-A443-C47104F14DD3}
 	EndGlobalSection
 EndGlobal
