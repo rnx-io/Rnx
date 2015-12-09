@@ -1,10 +1,10 @@
 {
-  "version": "0.1.1",
-  "description": "Rnx.Core Class Library",
-  "authors": [ "Daniel Kailer" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+    "version": "0.2.0-beta",
+    "description": "Rnx.Core Class Library",
+    "authors": [ "Daniel Kailer" ],
+    "tags": [ "" ],
+    "projectUrl": "https://github.com/rnx-io/Rnx",
+    "licenseUrl": "https://opensource.org/licenses/MIT",
     "frameworks": {
         "dnx451": { },
         "dnxcore50": {
@@ -22,13 +22,13 @@
         }
     },
     "dependencies": {
-        "Rnx.Common": "0.1.1",
         "Microsoft.CodeAnalysis.Common": "1.1.0-rc1",
-        "Microsoft.CodeAnalysis.CSharp": "1.1.0-beta1-20150928-02",
-        "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
+        "Microsoft.CodeAnalysis.CSharp": "1.1.1",
         "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Microsoft.Framework.Runtime": "1.0.0-beta6",
-        "Newtonsoft.Json": "8.0.1-beta3"
+        "Newtonsoft.Json": "8.0.1-beta3",
+        "Rnx.Common": "0.2.0-beta"
     }
 }

@@ -1,15 +1,9 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Rnx.Common")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Daniel Kailer")]
 [assembly: AssemblyProduct("Rnx.Common")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
-
-[assembly: InternalsVisibleTo("Rnx.Common.Tests")]
-[assembly: InternalsVisibleTo("Rnx.Core.Tests")]
-[assembly: InternalsVisibleTo("Rnx.Core")]
+[assembly: ComVisible(false)]

@@ -1,13 +1,10 @@
 ﻿using Rnx.Common.Buffers;
 using Rnx.Common.Execution;
-using Rnx.Common.Execution.Decorators;
 using Rnx.Common.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Rnx.Tasks.Core.Composite
 {
@@ -67,18 +64,6 @@ namespace Rnx.Tasks.Core.Composite
             foreach (var buffer in buffers.Where(f => f != input && f != output))
             {
                 buffer.Dispose();
-            }
-        }
-
-        internal class LoggingDecorator : AbstractLoggingExecutionDecorator
-        {
-            public override void Execute(ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
-            {
-                var seriesTask = (SeriesTask)task;
-                var logger = executionContext.ServiceProvider.GetService<ILoggerFactory>().CreateLogger(task.Name);
-                logger.LogInformation($"Executing {seriesTask.Tasks.Length} tasks in series...");
-
-                Decoratee.Execute(task, input, output, executionContext);
             }
         }
     }

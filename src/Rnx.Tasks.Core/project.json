@@ -1,10 +1,10 @@
 {
-  "version": "0.1.0",
-  "description": "Rnx.Tasks.Core Class Library",
-  "authors": [ "Daniel Kailer" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+    "version": "0.2.0-beta",
+    "description": "Rnx.Tasks.Core Class Library",
+    "authors": [ "Daniel Kailer" ],
+    "tags": [ "" ],
+    "projectUrl": "https://github.com/rnx-io/Rnx",
+    "licenseUrl": "https://opensource.org/licenses/MIT",
     "frameworks": {
         "dnx451": { },
         "dnxcore50": {
@@ -20,7 +20,7 @@
         }
     },
     "dependencies": {
-        "Rnx.Common": "0.1.0",
+        "Rnx.Common": "0.2.0-beta",
         "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc1-final",
         "Minimatch.DNX": "1.1.2",
         "System.IO.Compression.ZipFile": "4.0.1-beta-23516"

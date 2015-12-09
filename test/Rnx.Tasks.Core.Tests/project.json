@@ -10,9 +10,9 @@
         "xunit.runner.dnx": "2.1.0-rc1-build204",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
-        "Rnx.Common": "0.1.0",
-        "Rnx.Core": "0.1.0",
-        "Rnx.Tasks.Core": "0.1.0"
+        "Rnx.Common": "0.2.0-beta",
+        "Rnx.Core": "0.2.0-beta",
+        "Rnx.Tasks.Core": "0.2.0-beta"
     },
     "frameworks": {
         "dnx451": { },
