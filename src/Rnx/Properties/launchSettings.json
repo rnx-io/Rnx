@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Rnx": {
+      "commandName": "Rnx",
+      "commandLineArgs": "PrintConsole"
+    }
+  }
+}
