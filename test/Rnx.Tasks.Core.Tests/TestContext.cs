@@ -33,7 +33,7 @@ namespace Rnx.Tasks.Core.Tests
             var services = new ServiceCollection();
             services.AddSingleton<IFileSystem, DefaultFileSystem>();
             services.AddSingleton<IBufferElementFactory, DefaultBufferElementFactory>();
-            services.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+            services.AddSingleton<ILoggerFactory,LoggerFactory>();
             services.AddSingleton<ITaskExecuter, TestTaskExecuter>();
 
             ServiceProvider = services.BuildServiceProvider();

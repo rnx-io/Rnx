@@ -28,46 +28,67 @@ namespace Rnx
     public class Program
     {
         private const string DEFAULT_TASK_NAME = "Default";
-        
+
+        private static ILoggerFactory _loggerFactory;
+
         public static int Main(string[] args)
         {
-            Console.WriteLine("Starting Rnx...");
+            var entryLogger = new LoggerFactory().AddConsole(LogLevel.Information).CreateLogger("Rnx");
+            entryLogger.LogInformation("Starting Rnx...");
 
             var stopwatch = Stopwatch.StartNew();
 
             var rnxApp = new CommandLineApplication { Name = "Rnx", Description = "A cross-platform C# task runner" };
             var taskArgument =              rnxApp.Argument("[task1 task2]", "The name of the task(s) that should be executed", true);
-            var rnxProjectDirectoryOption = rnxApp.Option("-d|--rnx-project-dir <RNX_PROJECT_DIR>", "Specifies the directory for the Rnx configuration file", CommandOptionType.SingleValue);
+            var rnxProjectDirectoryOption = rnxApp.Option("-p|--rnx-project-dir <RNX_PROJECT_DIR>", "Specifies the directory for the Rnx configuration file", CommandOptionType.SingleValue);
             var baseDirectoryOption =       rnxApp.Option("-b|--base-directory <BASE_DIRECTORY>", "Directory path used as base directory", CommandOptionType.SingleValue);
             var silentOption =              rnxApp.Option("-s|--silent", "Disables logging to the console", CommandOptionType.NoValue);
-            var logLevelOption =            rnxApp.Option("-l|--log <LOG_LEVEL>", $"Value between 1 (most verbose) and 6 (only critical informations). The default is {CommandLineSettings.DEFAULT_LOG_LEVEL}", CommandOptionType.SingleValue);
+            var logLevelOption =            rnxApp.Option("-l|--log <LOG_LEVEL>", $"Value between 2 (most verbose) and 6 (only critical informations). The default is {CommandLineSettings.DEFAULT_LOG_LEVEL}", CommandOptionType.SingleValue);
 
             rnxApp.OnExecute(() =>
             {
+                string currentDirectory = Directory.GetCurrentDirectory();
                 var commandLineSettings = new CommandLineSettings();
-                commandLineSettings.IsSilent = silentOption.HasValue();
-                commandLineSettings.TasksToRun = string.IsNullOrWhiteSpace(taskArgument.Value) ? new[] { DEFAULT_TASK_NAME }
-                                                                                               : taskArgument.Values.ToArray();
-                if( logLevelOption.HasValue())
+                commandLineSettings.BaseDirectory = currentDirectory;
+
+                if(silentOption.HasValue())
+                {
+                    commandLineSettings.IsSilent = true;
+                    commandLineSettings.LogLevel = (int)LogLevel.None;
+                }
+                else if (logLevelOption.HasValue())
                 {
                     commandLineSettings.LogLevel = EnsureValidLogLevel(logLevelOption.Value());
                 }
 
-                string currentDirectory = Directory.GetCurrentDirectory();
+                _loggerFactory = new LoggerFactory().AddConsole((LogLevel)commandLineSettings.LogLevel);
+                var logger = _loggerFactory.CreateLogger("Rnx");
+
+                commandLineSettings.TasksToRun = string.IsNullOrWhiteSpace(taskArgument.Value) ? new[] { DEFAULT_TASK_NAME }
+                                                                                               : taskArgument.Values.ToArray();
+                logger.LogVerbose($"Current dirctory: {currentDirectory}");
+                logger.LogVerbose($"Tasks to run: {string.Join(", ", commandLineSettings.TasksToRun)}");
+
                 string rnxProjectDirectory = PlatformServices.Default.Application.ApplicationBasePath;
 
                 if (rnxProjectDirectoryOption.HasValue())
                 {
+                    logger.LogVerbose($"Rnx project directory specified: {rnxProjectDirectoryOption.Value()}");
                     rnxProjectDirectory = Path.GetFullPath(Path.Combine(currentDirectory, rnxProjectDirectoryOption.Value()));
 
                     if (!Directory.Exists(rnxProjectDirectory))
                     {
-                        return LogFailed($"Can not find Rnx project directory '{rnxProjectDirectory}'. Please specify a valid directory.");
+                        logger.LogError($"Can not find Rnx project directory '{rnxProjectDirectory}'. Please specify a valid directory.");
+                        return 1;
                     }
                 }
 
-                // we use the current directory as base directory, except when a base directory is provided via command line
-                commandLineSettings.BaseDirectory = baseDirectoryOption.HasValue() ? baseDirectoryOption.Value() : currentDirectory;
+                if(baseDirectoryOption.HasValue())
+                {
+                    commandLineSettings.BaseDirectory = baseDirectoryOption.Value();
+                    logger.LogVerbose($"Base directory specified: {commandLineSettings.BaseDirectory}");
+                }
+                    
                 commandLineSettings.RnxProjectDirectory = rnxProjectDirectory;
 
                 var result = Run(commandLineSettings);
@@ -80,8 +101,8 @@ namespace Rnx
             }
             catch (Exception ex)
             {
-                var errorCode = LogFailed($"Task execution error: {ex.Message}");
-                return errorCode;
+                entryLogger.LogCritical($"Task execution error: {ex.Message}");
+                return 1;
             }
             finally
             {
@@ -139,21 +160,10 @@ namespace Rnx
             IBootstrapper bootstrapper = new DefaultBootstrapper(PlatformServices.Default.Application, libExporter, PlatformServices.Default.AssemblyLoadContextAccessor);
             bootstrapper.Initialize();
 
-            ILoggerFactory loggerFactory;
-
-            if (commandLineSettings.IsSilent)
-            {
-                loggerFactory = new NullLoggerFactory();
-            }
-            else
-            {
-                loggerFactory = new LoggerFactory().AddConsole((LogLevel)commandLineSettings.LogLevel);
-            }
-
             var services = new ServiceCollection();
             services.AddInstance(typeof(IBootstrapper), bootstrapper)
                     .AddInstance(typeof(IMetaDataReferenceProvider), bootstrapper)
-                    .AddInstance(typeof(ILoggerFactory), loggerFactory);
+                    .AddInstance(typeof(ILoggerFactory), _loggerFactory);
 
             services.AddSingleton<ICodeCompiler, DefaultCodeCompiler>()
                     .AddSingleton<ITaskLoader, DefaultTaskLoader>()
@@ -210,13 +220,7 @@ namespace Rnx
                 }
             }
         }
-
-        private static int LogFailed(string message)
-        {
-            Console.WriteLine(message);
-            return 2;
-        }
-
+        
         private static int EnsureValidLogLevel(string input)
         {
             int result;
