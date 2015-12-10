@@ -1,5 +1,5 @@
 {
-    "version": "0.2.0-beta",
+    "version": "0.2.1-beta",
     "description": "Rnx.Core Class Library",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
@@ -29,6 +29,6 @@
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Microsoft.Framework.Runtime": "1.0.0-beta6",
         "Newtonsoft.Json": "8.0.1-beta3",
-        "Rnx.Common": "0.2.0-beta"
+        "Rnx.Common": "0.2.4-beta"
     }
 }
