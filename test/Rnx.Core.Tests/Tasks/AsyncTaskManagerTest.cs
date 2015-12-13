@@ -1,10 +1,10 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Execution;
 using Rnx.Core.Tasks;
 using Rnx.Core.Execution;
 
@@ -35,7 +35,7 @@ namespace Rnx.Core.Tests.Tasks
 
             // Act
             var asyncTask = new AsyncTestTask();
-            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext);
+            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.UserDefinedTaskName);
             asyncTask.Execute(null, null, executionContext);
 
             // Assert
@@ -56,11 +56,11 @@ namespace Rnx.Core.Tests.Tasks
 
             // Act
             var asyncTask = new AsyncTestTask();
-            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext);
+            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.UserDefinedTaskName);
             asyncTask.Execute(null, null, executionContext);
 
             // Assert
-            asyncTaskManager.WaitForTaskCompletion(executionContext, executionId);
+            asyncTaskManager.WaitForTaskCompletion(executionContext.UserDefinedTaskName, executionId);
             Assert.True(true);
         }
     }

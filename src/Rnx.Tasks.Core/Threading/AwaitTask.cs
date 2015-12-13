@@ -1,9 +1,9 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
 
 namespace Rnx.Tasks.Core.Threading
 {
@@ -23,10 +23,12 @@ namespace Rnx.Tasks.Core.Threading
         
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var asyncManager = GetService<IAsyncTaskManager>(executionContext);
-            var eventArgs = asyncManager.WaitForTaskCompletion(executionContext, _executionId);
+            var asyncManager = GetAsyncTaskManager(executionContext);
+            var eventArgs = asyncManager.WaitForTaskCompletion(executionContext.UserDefinedTaskName, _executionId);
 
             _action?.Invoke(eventArgs, input, output, executionContext);
         }
+
+        protected virtual IAsyncTaskManager GetAsyncTaskManager(IExecutionContext ctx) => RequireService<IAsyncTaskManager>(ctx);
     }
 }

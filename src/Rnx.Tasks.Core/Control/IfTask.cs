@@ -1,16 +1,25 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Execution.Decorators;
+using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
 using System.Threading.Tasks;
 
 namespace Rnx.Tasks.Core.Control
 {
-    public class IfTask : RnxTask
+    public class IfTask : RnxTask, ITaskDecorationProvider
     {
-        private List<PredicateTaskPair> _predicateTaskPairs;
+        private readonly List<PredicateTaskPair> _predicateTaskPairs;
+
+        public IEnumerable<ITaskDecorator> TaskDecorators
+        {
+            get
+            {
+                yield return new NullLoggingTaskDecorator();
+            }
+        }
 
         public IfTask(Predicate<IBufferElement> predicate, ITask taskToRun)
         {
@@ -32,31 +41,34 @@ namespace Rnx.Tasks.Core.Control
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
+            var bufferFactory = GetBufferFactory(executionContext);
+            var taskExecuter = GetTaskExecuter(executionContext);
+
             var taskInputBufferMap = new Dictionary<ITask, IBuffer>();
             var runningTasks = new List<Task>();
 
-            foreach(var e in input.Elements)
+            foreach (var e in input.Elements)
             {
                 var matchingPredicatePair = _predicateTaskPairs.FirstOrDefault(f => f.Item1(e));
 
-                if( matchingPredicatePair != null )
+                if (matchingPredicatePair != null)
                 {
                     IBuffer existingTaskBuffer;
 
-                    if(taskInputBufferMap.TryGetValue(matchingPredicatePair.Item2, out existingTaskBuffer))
+                    if (taskInputBufferMap.TryGetValue(matchingPredicatePair.Item2, out existingTaskBuffer))
                     {
                         // A matching task was already started. Add the current element to the according input buffer of this task
                         existingTaskBuffer.Add(e);
                     }
                     else
                     {
-                        var taskToRunInputBuffer = new BlockingBuffer();
+                        var taskToRunInputBuffer = bufferFactory.Create();
                         taskToRunInputBuffer.Add(e);
                         taskInputBufferMap.Add(matchingPredicatePair.Item2, taskToRunInputBuffer);
 
                         var runningTask = Task.Run(() =>
                         {
-                            ExecuteTask(matchingPredicatePair.Item2, taskToRunInputBuffer, output, executionContext);
+                            taskExecuter.Execute(matchingPredicatePair.Item2, taskToRunInputBuffer, output, executionContext);
                         });
                         runningTasks.Add(runningTask);
                     }
@@ -83,6 +95,8 @@ namespace Rnx.Tasks.Core.Control
                 inputBuffer.Dispose();
             }
         }
+
+        protected virtual IBufferFactory GetBufferFactory(IExecutionContext ctx) => RequireService<IBufferFactory>(ctx);
 
         private class PredicateTaskPair : Tuple<Predicate<IBufferElement>, ITask>
         {

@@ -1,12 +1,12 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Execution;
 using System.IO;
-using Rnx.Common.Util;
+using Rnx.Abstractions.Util;
 using Microsoft.Extensions.DependencyInjection;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Buffers;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
@@ -22,7 +22,6 @@ namespace Rnx.Tasks.Core.FileSystem
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var baseDir = executionContext.BaseDirectory;
-            var filesystem = GetService<IFileSystem>(executionContext);
 
             foreach(var e in input.Elements.Where(f => f.Data.Exists<WriteFileData>()))
             {
@@ -45,10 +44,30 @@ namespace Rnx.Tasks.Core.FileSystem
                     }
                 }
 
-                filesystem.WriteBufferElement(e, outputFilename);
+                WriteBufferElement(e, outputFilename);
                 writeFileData.WrittenFilename = outputFilename;
 
                 output.Add(e);
+            }
+        }
+
+        private void WriteBufferElement(IBufferElement bufferElement, string outputFilename)
+        {
+            if (!Directory.Exists(Path.GetDirectoryName(outputFilename)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(outputFilename));
+            }
+
+            if (bufferElement.HasText)
+            {
+                File.WriteAllText(outputFilename, bufferElement.Text);
+            }
+            else
+            {
+                using (var fs = File.OpenWrite(outputFilename))
+                {
+                    bufferElement.Stream.CopyTo(fs);
+                }
             }
         }
     }

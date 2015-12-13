@@ -1,0 +1,28 @@
+{
+    "version": "0.2.4-beta",
+    "description": "Rnx.Abstractions Class Library",
+    "authors": [ "Daniel Kailer" ],
+    "tags": [ "" ],
+    "projectUrl": "https://github.com/rnx-io/Rnx",
+    "licenseUrl": "https://opensource.org/licenses/MIT",
+    "dependencies": {
+        "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+        "Microsoft.Extensions.FileSystemGlobbing": "1.0.0-rc1-final",
+        "Microsoft.CSharp": "4.0.1-beta-23409",
+        "Microsoft.CodeAnalysis.Common": "1.1.1",
+        "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final"
+    },
+    "frameworks": {
+        "net451": { },
+        "dotnet5.4": {
+            "dependencies": {
+                "System.Runtime": "4.0.21-beta-23409",
+                "System.Text.RegularExpressions": "4.0.11-beta-23409",
+                "System.Collections": "4.0.11-beta-23409",
+                "System.Linq": "4.0.1-beta-23409",
+                "System.Threading": "4.0.11-beta-23409",
+                "System.Linq.Parallel": "4.0.1-beta-23409"
+            }
+        }
+    }
+}

@@ -6,11 +6,11 @@
   "projectUrl": "",
   "licenseUrl": "",
     "frameworks": {
-        "dnx451": { }
+        "net451": { }
     },
     "dependencies": {
         "dotless": "1.5.2",
-        "Rnx.Common": "0.2.4-beta",
+        "Rnx.Abstractions": "0.2.4-beta",
         "Rnx.Tasks.Core": "0.2.0-beta"
     }
 }

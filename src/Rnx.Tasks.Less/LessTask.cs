@@ -1,10 +1,10 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
 using Rnx.Tasks.Core.FileSystem;
 
 namespace Rnx.Tasks.Less

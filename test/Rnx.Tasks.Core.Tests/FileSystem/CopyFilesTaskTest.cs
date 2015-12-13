@@ -1,5 +1,5 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
 using Rnx.Tasks.Core.FileSystem;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
+using Rnx.Core.Buffers;
 
 namespace Rnx.Tasks.Core.Tests.FileSystem
 {

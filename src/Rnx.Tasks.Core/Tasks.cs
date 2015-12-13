@@ -1,6 +1,6 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.Composite;
 using Rnx.Tasks.Core.Compression;
 using Rnx.Tasks.Core.Content;

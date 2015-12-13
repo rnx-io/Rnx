@@ -1,5 +1,5 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,7 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Rnx.Tasks.Core.FileSystem;
 using System.IO.Compression;
-using Rnx.Common.Tasks;
+using Rnx.Abstractions.Tasks;
+using Rnx.Tasks.Core.Compression.Internal;
 
 namespace Rnx.Tasks.Core.Compression
 {
@@ -16,7 +17,7 @@ namespace Rnx.Tasks.Core.Compression
     {
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferElementFactory = executionContext.ServiceProvider.GetService<IBufferElementFactory>();
+            var bufferElementFactory = GetBufferElementFactory(executionContext);
 
             Parallel.ForEach(input.ElementsPartitioner, e =>
             {
@@ -42,5 +43,7 @@ namespace Rnx.Tasks.Core.Compression
                 }
             });
         }
+
+        protected virtual IBufferElementFactory GetBufferElementFactory(IExecutionContext ctx) => RequireService<IBufferElementFactory>(ctx);
     }
 }

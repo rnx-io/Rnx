@@ -1,7 +1,6 @@
-﻿using Rnx.Common.Execution;
-using Rnx.Common.Util;
+﻿using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Util;
 using Rnx.Core.Execution;
-using Rnx.Core.Util;
 using Microsoft.Extensions.PlatformAbstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -11,9 +10,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Rnx.Tasks.Core.FileSystem;
 using Microsoft.Extensions.Logging;
-using Rnx.Common.Buffers;
-using Rnx.Common.Tasks;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Tasks;
 using Rnx.Core.Buffers;
+using Reliak.IO.Abstractions;
+using Rnx.Util.FileSystem;
 
 namespace Rnx.Tasks.Core.Tests
 {
@@ -32,9 +33,11 @@ namespace Rnx.Tasks.Core.Tests
             // Arrange
             var services = new ServiceCollection();
             services.AddSingleton<IFileSystem, DefaultFileSystem>();
+            services.AddSingleton<IGlobMatcher, DefaultGlobMatcher>();
             services.AddSingleton<IBufferElementFactory, DefaultBufferElementFactory>();
             services.AddSingleton<ILoggerFactory,LoggerFactory>();
             services.AddSingleton<ITaskExecuter, TestTaskExecuter>();
+            services.AddSingleton<IBufferFactory, BlockingBufferFactory>();
 
             ServiceProvider = services.BuildServiceProvider();
             ExecutionContext = new ExecutionContext("Test", Path.GetDirectoryName(configFilename), ServiceProvider);

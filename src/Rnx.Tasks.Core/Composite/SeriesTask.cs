@@ -1,6 +1,7 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
+using Rnx.Tasks.Core.Composite.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,10 @@ namespace Rnx.Tasks.Core.Composite
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var fac = new TaskFactory(TaskCreationOptions.None, TaskContinuationOptions.None);
+            var bufferFactory = GetBufferFactory(executionContext);
+            var taskExecuter = GetTaskExecuter(executionContext);
+
+            var taskFactory = new TaskFactory(TaskCreationOptions.None, TaskContinuationOptions.None);
             var stages = new List<Task>();
             var buffers = new List<IBuffer>();
             Action firstAction = () => { };
@@ -25,8 +29,8 @@ namespace Rnx.Tasks.Core.Composite
             {
                 var t = Tasks[i];
                 IBuffer taskInputBuffer = buffers.LastOrDefault();
-                IBuffer taskOutputBuffer = i == (Tasks.Length - 1) ? output : new BlockingBuffer();
-                Action executeAction = () => ExecuteTask(t, taskInputBuffer, taskOutputBuffer, executionContext);
+                IBuffer taskOutputBuffer = i == (Tasks.Length - 1) ? output : bufferFactory.Create();
+                Action executeAction = () => taskExecuter.Execute(t, taskInputBuffer, taskOutputBuffer, executionContext);
 
                 if (i == 0)
                 {
@@ -36,7 +40,7 @@ namespace Rnx.Tasks.Core.Composite
                 {
                     taskInputBuffer.Ready += (s, e) =>
                     {
-                        var nextStage = fac.StartNew(executeAction);
+                        var nextStage = taskFactory.StartNew(executeAction);
                         stages.Add(nextStage);
                     };
                 }
@@ -45,13 +49,13 @@ namespace Rnx.Tasks.Core.Composite
             }
 
             // Run the first action
-            stages.Add(fac.StartNew(firstAction));
+            stages.Add(taskFactory.StartNew(firstAction));
 
             while (true)
             {
                 var stage = stages.FirstOrDefault();
 
-                if( stage == null )
+                if (stage == null)
                 {
                     break;
                 }
@@ -66,5 +70,7 @@ namespace Rnx.Tasks.Core.Composite
                 buffer.Dispose();
             }
         }
+
+        protected virtual IBufferFactory GetBufferFactory(IExecutionContext ctx) => RequireService<IBufferFactory>(ctx);
     }
 }

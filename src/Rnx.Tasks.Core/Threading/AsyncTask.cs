@@ -1,9 +1,9 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Execution;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Buffers;
 using System.Threading.Tasks;
 
 namespace Rnx.Tasks.Core.Threading
@@ -26,14 +26,16 @@ namespace Rnx.Tasks.Core.Threading
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            IBuffer taskToRunInputBuffer = new BlockingBuffer();
+            var bufferFactory = GetBufferFactory(executionContext);
+            var taskExecuter = GetTaskExecuter(executionContext);
+            IBuffer taskToRunInputBuffer = bufferFactory.Create();
 
             Task.Run(() =>
             {
                 try
                 {
-                    var outputBuffer = new BlockingBuffer();
-                    ExecuteTask(_taskToRunAsynchronously, taskToRunInputBuffer, outputBuffer, executionContext);
+                    var outputBuffer = bufferFactory.Create();
+                    taskExecuter.Execute(_taskToRunAsynchronously, taskToRunInputBuffer, outputBuffer, executionContext);
                     Completed?.Invoke(this, new AsyncTaskCompletedEventArgs(this, executionContext, outputBuffer));
                 }
                 catch (Exception ex)
@@ -53,5 +55,8 @@ namespace Rnx.Tasks.Core.Threading
             // signal running task, that all elements were added
             taskToRunInputBuffer.CompleteAdding();
         }
+
+        protected virtual IBufferFactory GetBufferFactory(IExecutionContext ctx) => RequireService<IBufferFactory>(ctx);
+        
     }
 }

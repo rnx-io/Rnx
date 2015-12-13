@@ -1,11 +1,8 @@
-﻿using Rnx.Common.Tasks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Rnx.Common.Execution;
-using Microsoft.Extensions.DependencyInjection;
-using Rnx.Common.Buffers;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.FileSystem;
+using System.Linq;
 
 namespace Rnx.Tasks.Core.Content
 {
@@ -22,13 +19,15 @@ namespace Rnx.Tasks.Core.Content
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var elementFactory = GetService<IBufferElementFactory>(executionContext);
+            var bufferElementFactory = GetBufferElementFactory(executionContext);
             var inputElements = input.Elements.ToArray();
             var concatedText = string.Join(_separator, inputElements.Select(f => f.Text).ToArray());
 
-            var newElement = elementFactory.Create(concatedText);
+            var newElement = bufferElementFactory.Create(concatedText);
             newElement.Data.Add(new WriteFileData(_targetFilepath));
             output.Add(newElement);
         }
+
+        protected virtual IBufferElementFactory GetBufferElementFactory(IExecutionContext ctx) => RequireService<IBufferElementFactory>(ctx);
     }
 }

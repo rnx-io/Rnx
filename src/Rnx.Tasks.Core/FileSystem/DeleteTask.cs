@@ -1,12 +1,12 @@
-﻿using Rnx.Common.Tasks;
+﻿using Reliak.IO.Abstractions;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
+using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Rnx.Common.Execution;
-using Rnx.Common.Util;
-using Microsoft.Extensions.DependencyInjection;
 using System.IO;
-using Rnx.Common.Buffers;
+using System.Linq;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
@@ -37,12 +37,13 @@ namespace Rnx.Tasks.Core.FileSystem
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var dirPath = executionContext.BaseDirectory;
-            var filesystem = GetService<IFileSystem>(executionContext);
+            var fileSystem = GetService<IFileSystem>(executionContext);
+            var globMatcher = GetService<IGlobMatcher>(executionContext);
             var affectedDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var file in filesystem.FindFiles(dirPath, _globPatterns).Where(f => _condition(f.FullPath)))
+            foreach (var file in globMatcher.FindMatches(dirPath, _globPatterns).Where(f => _condition(f.FullPath)))
             {
-                File.Delete(file.FullPath);
+                fileSystem.File.Delete(file.FullPath);
 
                 if (!_keepEmptyDirectories)
                 {
@@ -50,7 +51,7 @@ namespace Rnx.Tasks.Core.FileSystem
 
                     while (path.Length > 0)
                     {
-                        affectedDirectories.Add(Path.GetFullPath(Path.Combine(file.BaseDirectory, path)));
+                        affectedDirectories.Add(Path.GetFullPath(Path.Combine(dirPath, path)));
                         path = Path.GetDirectoryName(path);
                     }
                 }
@@ -58,9 +59,10 @@ namespace Rnx.Tasks.Core.FileSystem
 
             foreach (var dir in affectedDirectories.OrderByDescending(f => f.Length))
             {
-                if (filesystem.IsDirectoryEmpty(dir))
+                // Delete if directory is empty
+                if (!fileSystem.Directory.EnumerateFileSystemEntries(dir).Any())
                 {
-                    Directory.Delete(dir);
+                    fileSystem.Directory.Delete(dir);
                 }
             }
         }

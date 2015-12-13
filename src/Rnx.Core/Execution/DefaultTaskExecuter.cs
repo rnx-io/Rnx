@@ -1,40 +1,50 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Execution.Decorators;
+using Rnx.Abstractions.Tasks;
+using Rnx.Core.Execution.Decorators;
 using System;
-using Microsoft.Extensions.DependencyInjection;
-using Rnx.Common.Execution.Decorators;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.IO;
 
 namespace Rnx.Core.Execution
 {
-    public class DefaultTaskExecuter : ITaskExecuter, ITaskExecutionDecorator
+    /// <summary>
+    /// Default implementation for <see cref="ITaskExecuter"/>. Also implements the <see cref="ITaskDecorator"/>-interface
+    /// so that it can be part of the task execution decorator workflow
+    /// </summary>
+    public class DefaultTaskExecuter : ITaskExecuter, ITaskDecorator
     {
-        public ITaskExecutionDecorator Decoratee { private get; set; }
         public Type ExportType => GetType();
+
+        private IEnumerable<ITaskDecorator> _taskDecorators;
+
+        public DefaultTaskExecuter(IEnumerable<ITaskDecorator> taskDecorators)
+        {
+            _taskDecorators = taskDecorators;
+        }
 
         public void Execute(ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            ITaskExecutionDecorator decoratee = this;
-            var decorators = executionContext.ServiceProvider.GetServices<ITaskExecutionDecorator>();
-            var decoratorService = executionContext.ServiceProvider.GetService<ITaskDecoratorService>();
-            var taskSpecificDecorators = decoratorService.FindDecorators(task.GetType());
+            // find all task-specific decorators that were registered for this type of task
+            var taskSpecificDecorators = task is ITaskDecorationProvider ? ((ITaskDecorationProvider)task).TaskDecorators : Enumerable.Empty<ITaskDecorator>();
 
-            decorators = decorators.Where(f => !taskSpecificDecorators.Select(x => x.ExportType).Contains(f.ExportType)).Concat(taskSpecificDecorators);
+            // select all common decorators, except those that are overwritten by task-specific decorators
+            // merge these with all task-specific decorators and finally with the task executer ("this")
+            var decoratorQueue = new DecoratorQueue(_taskDecorators.Where(f => !taskSpecificDecorators.Select(x => x.ExportType).Contains(f.ExportType))
+                                                                   .Concat(taskSpecificDecorators)
+                                                                   .Concat(Enumerable.Repeat(this, 1)));
 
-            foreach (var deco in decorators)
-            {
-                deco.Decoratee = decoratee;
-                decoratee = deco;
-            }
-
-            decoratee.Execute(task, input, output, executionContext);
+            // get the first decorator of the queue (will be "this" when no decorators are present)
+            // and call execute on that decorator
+            decoratorQueue.GetNext().Execute(decoratorQueue, task, input, output, executionContext);
         }
 
-        void ITaskExecutionDecorator.Execute(ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
+        void ITaskDecorator.Execute(IDecoratorQueue decoratorQueue, ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
+            // this is the final point where a task will be actually executed
             task.Execute(input, output, executionContext);
         }
     }

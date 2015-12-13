@@ -1,6 +1,6 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using System;
 using System.IO;
 using System.Threading;
@@ -51,6 +51,8 @@ namespace Rnx.Tasks.Core.FileSystem
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
+            var bufferFactory = GetService<IBufferFactory>(executionContext);
+
             Task.Run(() =>
             {
                 var resetEvent = new ManualResetEventSlim(false);
@@ -63,7 +65,7 @@ namespace Rnx.Tasks.Core.FileSystem
                         {
                             _onChangeAction?.Invoke(e);
 
-                            using (var taskToRunOutputBuffer = new BlockingBuffer())
+                            using (var taskToRunOutputBuffer = bufferFactory.Create())
                             {
                                 ExecuteTask(_taskToRun, new NullBuffer(), taskToRunOutputBuffer, executionContext);
                             }

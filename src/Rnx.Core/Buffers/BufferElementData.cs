@@ -1,4 +1,4 @@
-﻿using Rnx.Common.Buffers;
+﻿using Rnx.Abstractions.Buffers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Rnx.Core.Buffers
 {
+    /// <summary>
+    /// Default implementation of <see cref="IBufferElementData"/>
+    /// </summary>
     public class BufferElementData : IBufferElementData
     {
         private readonly Dictionary<object, object> _dataEntries;
@@ -56,13 +59,14 @@ namespace Rnx.Core.Buffers
             _dataEntries.Remove(key);
         }
 
-        public object Clone()
+        public IBufferElementData Clone()
         {
             var clone = new BufferElementData();
 
+            // The entries of the dictionary are cloned when they implement IClonable, otherwise the values are stored
             foreach (var kvp in _dataEntries)
             {
-                object clonedValue = kvp.Value is Common.Util.ICloneable ? ((Common.Util.ICloneable)kvp.Value).Clone() : kvp.Value;
+                object clonedValue = kvp.Value is Rnx.Abstractions.Util.ICloneable ? ((Rnx.Abstractions.Util.ICloneable)kvp.Value).Clone() : kvp.Value;
                 clone._dataEntries.Add(kvp.Key, clonedValue);
             }
 

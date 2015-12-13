@@ -1,4 +1,4 @@
-﻿using Rnx.Common.Util;
+﻿using Rnx.Abstractions.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
-    public class WriteFileData : Rnx.Common.Util.ICloneable
+    public class WriteFileData : Rnx.Abstractions.Util.ICloneable
     {
         private string _directoryName;
         private string _baseName;

@@ -1,5 +1,5 @@
-﻿using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Rnx.Core.Tasks
 {
+    /// <summary>
+    /// Default implementation for the <see cref="IAsyncTaskManager"/>
+    /// </summary>
     public class DefaultAsyncTaskManager : IAsyncTaskManager
     {
         private ConcurrentDictionary<string, ManualResetEventSlim> _tasks;
@@ -22,12 +25,12 @@ namespace Rnx.Core.Tasks
 
         public bool HasUncompletedTasks => _tasks.Any();
 
-        public void RegisterAsyncExecution(IAsyncTask asyncTask, IExecutionContext taskExecutionContext)
+        public void RegisterAsyncExecution(IAsyncTask asyncTask, string userDefinedTaskName)
         {
             // we prefix the name of the user defined task name to the execution id, because
             // maybe the same execution id is used in another user defined task and we want
             // the execution ids to be unique
-            var taskExecutionId = $"{taskExecutionContext.UserDefinedTaskName}_{asyncTask.ExecutionId}";
+            var taskExecutionId = $"{userDefinedTaskName}_{asyncTask.ExecutionId}";
 
             asyncTask.Completed += AsyncTask_Completed;
             _tasks.TryAdd(taskExecutionId, new ManualResetEventSlim(false));
@@ -46,12 +49,9 @@ namespace Rnx.Core.Tasks
             }
         }
 
-        /// <summary>
-        /// It will be waited till all async tasks of this user-defined tasks are complete
-        /// </summary>
-        public void WaitForTaskCompletion(IExecutionContext taskExecutionContext)
+        public void WaitForTaskCompletion(string userDefinedTaskName)
         {
-            var affectedTasks = _tasks.Where(f => f.Key.StartsWith($"{taskExecutionContext.UserDefinedTaskName}_"));
+            var affectedTasks = _tasks.Where(f => f.Key.StartsWith($"{userDefinedTaskName}_"));
 
             foreach (var t in affectedTasks.ToArray())
             {
@@ -60,12 +60,9 @@ namespace Rnx.Core.Tasks
             }
         }
 
-        /// <summary>
-        /// Waits for async tasks from a specified task (taskExecutionContext).
-        /// </summary>
-        public AsyncTaskCompletedEventArgs WaitForTaskCompletion(IExecutionContext taskExecutionContext, string executionId)
+        public AsyncTaskCompletedEventArgs WaitForTaskCompletion(string userDefinedTaskName, string executionId)
         {
-            executionId = $"{taskExecutionContext.UserDefinedTaskName}_{executionId}";
+            executionId = $"{userDefinedTaskName}_{executionId}";
             ManualResetEventSlim completionEvent;
 
             if( _tasks.TryGetValue(executionId, out completionEvent) )
@@ -80,9 +77,6 @@ namespace Rnx.Core.Tasks
             return null;
         }
 
-        /// <summary>
-        /// Waits for the completion of all async task from all user defined tasks
-        /// </summary>
         public void WaitAll()
         {
             while(_tasks.Any())

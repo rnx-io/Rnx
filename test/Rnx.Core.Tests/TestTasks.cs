@@ -1,10 +1,10 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Execution;
 using System.Threading;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Buffers;
 
 namespace Rnx.Core.Tests
 {

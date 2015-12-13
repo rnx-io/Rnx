@@ -1,6 +1,7 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
+using Rnx.Tasks.Core.Composite.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,9 +25,12 @@ namespace Rnx.Tasks.Core.Composite
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
+            var bufferFactory = GetBufferFactory(executionContext);
+            var taskExecuter = GetTaskExecuter(executionContext);
+
             IBuffer nullBuffer = new NullBuffer();
-            var taskInputBufferMap = Tasks.ToDictionary(f => f, f =>new BlockingBuffer());
-            var parallelTasks = Tasks.Select(task => Task.Run(() => ExecuteTask(task, taskInputBufferMap[task], nullBuffer, executionContext))).ToArray();
+            var taskInputBufferMap = Tasks.ToDictionary(f => f, f => bufferFactory.Create());
+            var parallelTasks = Tasks.Select(task => Task.Run(() => taskExecuter.Execute(task, taskInputBufferMap[task], nullBuffer, executionContext))).ToArray();
 
             // iterate through all elements from the input buffer and copy them to they output buffer
             // also add these elements (cloned if required) to the inputBuffer of the async executing task
@@ -55,5 +59,7 @@ namespace Rnx.Tasks.Core.Composite
                 buffer.Dispose();
             }
         }
+
+        protected virtual IBufferFactory GetBufferFactory(IExecutionContext ctx) => RequireService<IBufferFactory>(ctx);
     }
 }

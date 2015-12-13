@@ -1,14 +1,10 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.FileSystem;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Rnx.Tasks.Core.Compression
 {
@@ -23,7 +19,8 @@ namespace Rnx.Tasks.Core.Compression
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferElementFactory = executionContext.ServiceProvider.GetService<IBufferElementFactory>();
+            var bufferElementFactory = GetBufferElementFactory(executionContext);
+
             var outputStream = new MemoryStream();
 
             using (var archive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
@@ -51,5 +48,7 @@ namespace Rnx.Tasks.Core.Compression
 
             output.Add(newElement);
         }
+
+        protected virtual IBufferElementFactory GetBufferElementFactory(IExecutionContext ctx) => RequireService<IBufferElementFactory>(ctx);
     }
 }

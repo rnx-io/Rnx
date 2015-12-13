@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.IO;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Buffers;
 
 namespace Rnx.Core.Buffers
 {
+    /// <summary>
+    /// Responsible for creating the appropriate <see cref="IBufferElement"/>s
+    /// </summary>
     public class DefaultBufferElementFactory : IBufferElementFactory
     {
         public IBufferElement Create(Func<Stream> streamCallback)
