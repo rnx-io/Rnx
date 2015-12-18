@@ -29,7 +29,8 @@ namespace Rnx.Tasks.Core
         public static ParallelTaskDescriptor ConcatElements(params ITaskDescriptor[] taskDescriptors)
                                                 => new ParallelTaskDescriptor(ParallelTaskOutputStrategy.ConcatToInput, taskDescriptors);
         public static FilterTaskDescriptor Filter(Func<IBufferElement,bool> predicate) => new FilterTaskDescriptor(predicate);
-        public static IfTaskDescriptor If(Predicate<IBufferElement> predicate, ITaskDescriptor taskDescriptor) => new IfTaskDescriptor(predicate, taskDescriptor);
+        public static IfTaskDescriptor If(Func<IBufferElement,bool> predicate, ITaskDescriptor taskDescriptor) => new IfTaskDescriptor(predicate, taskDescriptor);
+        public static SwitchTaskDescriptor Switch(Func<IBufferElement, object> valueSelector) => new SwitchTaskDescriptor(valueSelector);
         public static OrderByTaskDescriptor OrderBy(OrderByCondition orderByCondition) => new OrderByTaskDescriptor(orderByCondition);
         public static BlockWiseTaskDescriptor BlockWise(int blockSize, Func<BlockWiseData, ITaskDescriptor> taskDescriptorToRun, bool requiresDetailedBlockInfo = false) 
                                 => new BlockWiseTaskDescriptor(blockSize, taskDescriptorToRun, requiresDetailedBlockInfo);
