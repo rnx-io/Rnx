@@ -1,29 +1,37 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.FileSystem;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Rnx.Tasks.Core.Compression
 {
+    public class ZipTaskDescriptor : TaskDescriptorBase<ZipTask>
+    {
+        public string ZipEntryFilePath { get; private set; }
+
+        public ZipTaskDescriptor(string zipEntryFilePath)
+        {
+            ZipEntryFilePath = zipEntryFilePath;
+        }
+    }
+
     public class ZipTask : RnxTask
     {
-        private string _zipEntryFilePath;
+        private readonly IBufferElementFactory _bufferElementFactory;
+        private readonly ZipTaskDescriptor _taskDescriptor;
 
-        public ZipTask(string zipEntryFilePath)
+        public ZipTask(ZipTaskDescriptor taskDescriptor, IBufferElementFactory bufferElementFactory)
         {
-            _zipEntryFilePath = zipEntryFilePath;
+            _taskDescriptor = taskDescriptor;
+            _bufferElementFactory = bufferElementFactory;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferElementFactory = executionContext.ServiceProvider.GetService<IBufferElementFactory>();
             var outputStream = new MemoryStream();
 
             using (var archive = new ZipArchive(outputStream, ZipArchiveMode.Create, true))
@@ -46,8 +54,8 @@ namespace Rnx.Tasks.Core.Compression
             // move cursor to the beginning, so the next tasks can read stream content
             outputStream.Seek(0, SeekOrigin.Begin);
 
-            var newElement = bufferElementFactory.Create(() => outputStream);
-            newElement.Data.Add(new WriteFileData(_zipEntryFilePath));
+            var newElement = _bufferElementFactory.Create(() => outputStream);
+            newElement.Data.Add(new WriteFileData(_taskDescriptor.ZipEntryFilePath));
 
             output.Add(newElement);
         }

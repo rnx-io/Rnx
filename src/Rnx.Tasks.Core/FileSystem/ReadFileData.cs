@@ -1,4 +1,4 @@
-﻿using Rnx.Common.Util;
+﻿using Rnx.Abstractions.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;

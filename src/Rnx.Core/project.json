@@ -6,8 +6,12 @@
     "projectUrl": "https://github.com/rnx-io/Rnx",
     "licenseUrl": "https://opensource.org/licenses/MIT",
     "frameworks": {
-        "dnx451": { },
-        "dnxcore50": {
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Runtime": ""
+            }
+        },
+        "dotnet5.4": {
             "dependencies": {
                 "Microsoft.CSharp": "4.0.1-beta-23409",
                 "System.Collections": "4.0.11-beta-23409",
@@ -27,8 +31,6 @@
         "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
-        "Microsoft.Framework.Runtime": "1.0.0-beta6",
-        "Newtonsoft.Json": "8.0.1-beta3",
-        "Rnx.Common": "0.2.4-beta"
+        "Rnx.Abstractions": "0.2.4-beta"
     }
 }

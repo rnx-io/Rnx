@@ -1,0 +1,16 @@
+{
+  "version": "0.1.0",
+  "description": "Rnx.Tasks.Markdown Class Library",
+  "authors": [ "dan" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+    "frameworks": {
+        "net451": { }
+    },
+    "dependencies": {
+        "CommonMark.NET": "0.10.0",
+        "Rnx.Abstractions": "0.2.4-beta",
+        "Rnx.Tasks.Core": "0.2.0-beta"
+    }
+}

@@ -1,4 +1,4 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 
 namespace Rnx.Core.Tasks
 {
+    /// <summary>
+    /// Default implementation of <see cref="ITaskRunTracker"/>
+    /// </summary>
     public class DefaultTaskRunTracker : ITaskRunTracker
     {
-        public Dictionary<string, DateTime> LastRuns { get; private set; }
+        public Dictionary<ITaskDescriptor, DateTime> LastTaskRuns { get; }
 
         public DefaultTaskRunTracker()
         {
-            this.LastRuns = new Dictionary<string, DateTime>();
+            LastTaskRuns = new Dictionary<ITaskDescriptor, DateTime>();
         }
     }
 }

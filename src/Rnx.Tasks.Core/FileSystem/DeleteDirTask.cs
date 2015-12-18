@@ -1,34 +1,47 @@
-﻿using Rnx.Common.Tasks;
+﻿using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Rnx.Common.Execution;
+using Rnx.Abstractions.Execution;
 using System.IO;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Buffers;
+using Reliak.IO.Abstractions;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
-    public class DeleteDirTask : RnxTask
+    public class DeleteDirTaskDescriptor : TaskDescriptorBase<DeleteDirTask>
     {
-        private string[] _directoryPaths;
-        private bool _recursive = true;
+        public string[] DirectoryPaths { get; }
+        public bool Recursive { get; private set; } = true;
 
-        public DeleteDirTask(params string[] directoryPaths)
+        public DeleteDirTaskDescriptor(params string[] directoryPaths)
         {
-            _directoryPaths = directoryPaths;
+            DirectoryPaths = directoryPaths;
         }
 
-        public DeleteDirTask NonRecursive()
+        public DeleteDirTaskDescriptor NonRecursive()
         {
-            _recursive = false;
+            Recursive = false;
             return this;
+        }
+    }
+
+    public class DeleteDirTask : RnxTask
+    {
+        private readonly DeleteDirTaskDescriptor _deleteDirTaskDescriptor;
+        private readonly IFileSystem _fileSystem;
+
+        public DeleteDirTask(DeleteDirTaskDescriptor deleteDirTaskDescriptor, IFileSystem fileSystem)
+        {
+            _deleteDirTaskDescriptor = deleteDirTaskDescriptor;
+            _fileSystem = fileSystem;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            foreach (var path in _directoryPaths.Where(f => Directory.Exists(f)))
+            foreach (var path in _deleteDirTaskDescriptor.DirectoryPaths.Where(f => _fileSystem.Directory.Exists(f)))
             {
-                Directory.Delete(path, _recursive);
+                _fileSystem.Directory.Delete(path, _deleteDirTaskDescriptor.Recursive);
             }
         }
     }

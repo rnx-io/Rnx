@@ -6,20 +6,28 @@ using System.Threading.Tasks;
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using Rnx.Tasks.Core.FileSystem;
-using Rnx.Common.Execution;
-using Rnx.Common.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Buffers;
+using Rnx.Core.Buffers;
+using Reliak.IO.Abstractions;
+using Microsoft.Extensions.PlatformAbstractions;
 
 namespace Rnx.Tasks.Core.Tests.FileSystem
 {
     public class WriteFilesTaskTest
     {
+        private static readonly string SampleDir1 = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Samples", "Sample1");
+
+        private WriteFilesTask CreateReadFilesTask(WriteFilesTaskDescriptor taskDescriptor)
+        {
+            return new WriteFilesTask(taskDescriptor, new DefaultFileSystem());
+        }
+
         [Fact]
         public void Test_That_Files_Are_Written()
         {
             // Arrange
-            var testContext = new TestContext("Sample1");
             var tempFolder = Path.Combine(Path.GetTempPath(), "WriteFilesTaskTest");
-            var taskexecuter = testContext.ServiceProvider.GetService<ITaskExecuter>();
 
             if (Directory.Exists(tempFolder))
             {
@@ -28,20 +36,19 @@ namespace Rnx.Tasks.Core.Tests.FileSystem
 
             Directory.CreateDirectory(tempFolder);
 
-            var bufferElementFactory = testContext.ServiceProvider.GetService<IBufferElementFactory>();
-            var bufferElement1 = bufferElementFactory.Create("text1");
-            var bufferElement2 = bufferElementFactory.Create("text2");
-
+            var bufferElementFactory = new DefaultBufferElementFactory();
             var bufferElements = new List<IBufferElement>();
-            bufferElements.Add(bufferElement1);
-            bufferElements.Add(bufferElement2);
+            bufferElements.Add(bufferElementFactory.Create("text1"));
+            bufferElements.Add(bufferElementFactory.Create("text2"));
 
             for (int i = 0; i < bufferElements.Count; ++i)
             {
                 bufferElements[i].Data.Add(new WriteFileData($"testfolder/{i}.txt"));
             }
 
-            var task = new WriteFilesTask(Path.Combine(tempFolder, "output"));
+            var d = new WriteFilesTaskDescriptor(Path.Combine(tempFolder, "output"));
+            var task = CreateReadFilesTask(d);
+            var executionContext = new ExecutionContext(d, tempFolder);
             var inputBuffer = new BlockingBuffer();
             var outputBuffer = new BlockingBuffer();
 
@@ -53,18 +60,16 @@ namespace Rnx.Tasks.Core.Tests.FileSystem
             inputBuffer.CompleteAdding();
 
             // Act
-            taskexecuter.Execute(task, inputBuffer, outputBuffer, testContext.ExecutionContext);
+            task.Execute(inputBuffer, outputBuffer, executionContext);
+            outputBuffer.CompleteAdding();
 
             // Assert
             var items = outputBuffer.Elements.ToArray();
             var files = Directory.EnumerateFiles(tempFolder, "*.*", SearchOption.AllDirectories).ToArray();
 
             Assert.Equal(2, files.Length);
-            var firstFile = files.FirstOrDefault(f => Path.GetFileName(f) == "0.txt");
-            var secondFile = files.FirstOrDefault(f => Path.GetFileName(f) == "1.txt");
-
-            Assert.NotNull(firstFile);
-            Assert.NotNull(secondFile);
+            Assert.True(files.Any(f => Path.GetFileName(f) == "0.txt"));
+            Assert.True(files.Any(f => Path.GetFileName(f) == "1.txt"));
 
             Assert.Equal("text1", File.ReadAllText(items.Select(f => f.Data.Get<WriteFileData>().WrittenFilename).First(f => Path.GetFileNameWithoutExtension(f) == "0")));
             Assert.Equal("text2", File.ReadAllText(items.Select(f => f.Data.Get<WriteFileData>().WrittenFilename).First(f => Path.GetFileNameWithoutExtension(f) == "1")));

@@ -1,5 +1,5 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,16 +8,24 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Rnx.Tasks.Core.FileSystem;
 using System.IO.Compression;
-using Rnx.Common.Tasks;
+using Rnx.Abstractions.Tasks;
 
 namespace Rnx.Tasks.Core.Compression
 {
+    public class UnzipTaskDescriptor : TaskDescriptorBase<UnzipTask>
+    { }
+
     public class UnzipTask : RnxTask
     {
+        private readonly IBufferElementFactory _bufferElementFactory;
+
+        public UnzipTask(IBufferElementFactory bufferElementFactory)
+        {
+            _bufferElementFactory = bufferElementFactory;
+        }
+
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferElementFactory = executionContext.ServiceProvider.GetService<IBufferElementFactory>();
-
             Parallel.ForEach(input.ElementsPartitioner, e =>
             {
                 using (var archive = new ZipArchive(e.Stream, ZipArchiveMode.Read, false))
@@ -26,7 +34,7 @@ namespace Rnx.Tasks.Core.Compression
                     foreach (var zipEntry in archive.Entries.Where(f => !string.Equals(f.Name, string.Empty)))
                     {
                         var outputStream = new MemoryStream();
-                        var newElement = bufferElementFactory.Create(() => outputStream);
+                        var newElement = _bufferElementFactory.Create(() => outputStream);
                         newElement.Data.Add(new WriteFileData(zipEntry.FullName));
 
                         using (var zipEntryStream = zipEntry.Open())

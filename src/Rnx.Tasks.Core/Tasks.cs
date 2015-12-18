@@ -1,7 +1,6 @@
-﻿using Rnx.Common.Buffers;
-using Rnx.Common.Execution;
-using Rnx.Common.Tasks;
-using Rnx.Tasks.Core.Composite;
+﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.Compression;
 using Rnx.Tasks.Core.Content;
 using Rnx.Tasks.Core.Control;
@@ -13,40 +12,45 @@ namespace Rnx.Tasks.Core
 {
     public static class Tasks
     {
-        // Composite
-        public static SeriesTask Series(params ITask[] tasks) => new SeriesTask(tasks);
-        public static ParallelTask Parallel(params ITask[] tasks) => new ParallelTask(tasks);
-
         // Compression
-        public static ZipTask Zip(string zipEntryFilePath) => new ZipTask(zipEntryFilePath);
-        public static UnzipTask Unzip() => new UnzipTask();
+        public static ZipTaskDescriptor Zip(string zipEntryFilePath) => new ZipTaskDescriptor(zipEntryFilePath);
+        public static UnzipTaskDescriptor Unzip() => new UnzipTaskDescriptor();
 
         // Content
-        public static ReplaceTask Replace(string searchText, string replacement) => new ReplaceTask(searchText, replacement);
-        public static PrependTask Prepend(string textToPrepend) => new PrependTask(textToPrepend);
-        public static AppendTask Append(string textToAppend) => new AppendTask(textToAppend);
-        public static ConcatTask Concat(string targetFilepath, string separator = "") => new ConcatTask(targetFilepath, separator);
+        public static ReplaceTextTaskDescriptor Replace(string searchText, string replacement) => new ReplaceTextTaskDescriptor(searchText, replacement);
+        public static PrependTextTaskDescriptor Prepend(string textToPrepend) => new PrependTextTaskDescriptor(textToPrepend);
+        public static AppendTextTaskDescriptor Append(string textToAppend) => new AppendTextTaskDescriptor(textToAppend);
+        public static ConcatTextTaskDescriptor Concat(string targetFilepath, string separator = "") => new ConcatTextTaskDescriptor(targetFilepath, separator);
 
         // Control
-        public static FilterTask Filter(Func<IBufferElement,bool> predicate) => new FilterTask(predicate);
-        public static IfTask If(Predicate<IBufferElement> predicate, ITask taskToRun) => new IfTask(predicate, taskToRun);
+        public static SeriesTaskDescriptor Series(params ITaskDescriptor[] taskDescriptors) => new SeriesTaskDescriptor(taskDescriptors);
+        public static ParallelTaskDescriptor Parallel(ParallelTaskOutputStrategy outputStrategy, params ITaskDescriptor[] taskDescriptors)
+                                                => new ParallelTaskDescriptor(outputStrategy, taskDescriptors);
+        public static ParallelTaskDescriptor ConcatElements(params ITaskDescriptor[] taskDescriptors)
+                                                => new ParallelTaskDescriptor(ParallelTaskOutputStrategy.ConcatToInput, taskDescriptors);
+        public static FilterTaskDescriptor Filter(Func<IBufferElement,bool> predicate) => new FilterTaskDescriptor(predicate);
+        public static IfTaskDescriptor If(Predicate<IBufferElement> predicate, ITaskDescriptor taskDescriptor) => new IfTaskDescriptor(predicate, taskDescriptor);
+        public static OrderByTaskDescriptor OrderBy(OrderByCondition orderByCondition) => new OrderByTaskDescriptor(orderByCondition);
+        public static BlockWiseTaskDescriptor BlockWise(int blockSize, Func<BlockWiseData, ITaskDescriptor> taskDescriptorToRun, bool requiresDetailedBlockInfo = false) 
+                                => new BlockWiseTaskDescriptor(blockSize, taskDescriptorToRun, requiresDetailedBlockInfo);
 
         // FileSystem
-        public static CopyFilesTask CopyFiles(string sourceGlobPattern, string destination) => new CopyFilesTask(sourceGlobPattern, destination);
-        public static DeleteDirTask DeleteDir(params string[] directoryPaths) => new DeleteDirTask(directoryPaths);
-        public static DeleteTask Delete(params string[] globPatterns) => new DeleteTask(globPatterns);
-        public static ReadFilesTask ReadFiles(params string[] globPatterns) => new ReadFilesTask(globPatterns);
-        public static RenameTask Rename(Action<WriteFileData> action) => new RenameTask(action);
-        public static RenameTask Rename(Action<IBufferElement, WriteFileData> action) => new RenameTask(action);
-        public static WriteFilesTask WriteFiles(string destinationDirectory) => new WriteFilesTask(destinationDirectory);
-        public static SimpleWatchTask SimpleWatch(string directoryPath, ITask taskToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
-                                => new SimpleWatchTask(directoryPath, taskToRun, simpleFilter, includeSubdirectories);
+        public static SetFilePathTaskDescriptor SetFilePath(Func<IBufferElement, string> elementFilePath) => new SetFilePathTaskDescriptor(elementFilePath);
+        public static CopyFilesTaskDescriptor CopyFiles(string sourceGlobPattern, string destination) => new CopyFilesTaskDescriptor(sourceGlobPattern, destination);
+        public static DeleteDirTaskDescriptor DeleteDir(params string[] directoryPaths) => new DeleteDirTaskDescriptor(directoryPaths);
+        public static DeleteTaskDescriptor Delete(params string[] globPatterns) => new DeleteTaskDescriptor(globPatterns);
+        public static ReadFilesTaskDescriptor ReadFiles(params string[] globPatterns) => new ReadFilesTaskDescriptor(globPatterns);
+        public static RenameTaskDescriptor Rename(Action<WriteFileData> action) => new RenameTaskDescriptor(action);
+        public static RenameTaskDescriptor Rename(Action<IBufferElement, WriteFileData> action) => new RenameTaskDescriptor(action);
+        public static WriteFilesTaskDescriptor WriteFiles(string destinationDirectory) => new WriteFilesTaskDescriptor(destinationDirectory);
+        public static SimpleWatchTaskDescriptor SimpleWatch(string directoryPath, ITaskDescriptor taskDescriptorToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
+                                => new SimpleWatchTaskDescriptor(directoryPath, taskDescriptorToRun, simpleFilter, includeSubdirectories);
 
         // Threading
-        public static AsyncTask Async(ITask taskToRunAsynchronously, string executionId = null, bool requiresClonedElements = false)
-                                => new AsyncTask(taskToRunAsynchronously, executionId, requiresClonedElements);
-        public static AwaitTask Await() => new AwaitTask();
-        public static AwaitTask Await(string executionId, Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> action = null)
-                                => new AwaitTask(executionId, action);
+        public static AsyncTaskDescriptor Async(ITaskDescriptor taskDescriptorToRunAsynchronously, string executionId = null)
+                                => new AsyncTaskDescriptor(taskDescriptorToRunAsynchronously, executionId);
+        public static AwaitTaskDescriptor Await() => new AwaitTaskDescriptor();
+        public static AwaitTaskDescriptor Await(string executionId, Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> action = null)
+                                => new AwaitTaskDescriptor(executionId, action);
     }
 }
