@@ -31,11 +31,11 @@ namespace Rnx.Core.Tests.Tasks
         {
             // Arrange
             var asyncTaskManager = new DefaultAsyncTaskManager();
-            var executionContext = new ExecutionContext("Clean", null, null);
+            var executionContext = new ExecutionContext(new NullTaskDescriptor(), null);
 
             // Act
             var asyncTask = new AsyncTestTask();
-            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.UserDefinedTaskName);
+            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.RootTaskDescriptor);
             asyncTask.Execute(null, null, executionContext);
 
             // Assert
@@ -52,15 +52,15 @@ namespace Rnx.Core.Tests.Tasks
         {
             // Arrange
             var asyncTaskManager = new DefaultAsyncTaskManager();
-            var executionContext = new ExecutionContext("Clean", null, null);
+            var executionContext = new ExecutionContext(new NullTaskDescriptor(), null);
 
             // Act
             var asyncTask = new AsyncTestTask();
-            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.UserDefinedTaskName);
+            asyncTaskManager.RegisterAsyncExecution(asyncTask, executionContext.RootTaskDescriptor);
             asyncTask.Execute(null, null, executionContext);
 
             // Assert
-            asyncTaskManager.WaitForTaskCompletion(executionContext.UserDefinedTaskName, executionId);
+            asyncTaskManager.WaitForTaskCompletion(executionContext.RootTaskDescriptor, executionId);
             Assert.True(true);
         }
     }

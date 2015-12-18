@@ -12,9 +12,9 @@ namespace Rnx.TaskLoader.Compilation
 {
     public class DefaultCodeCompiler : ICodeCompiler
     {
-        private IAssemblyLoadContextAccessor _assemblyLoadContextAccessor;
-        private IMetaDataReferenceProvider _metaDataReferenceProvider;
-        private IApplicationEnvironment _applicationEnvironment;
+        private readonly IAssemblyLoadContextAccessor _assemblyLoadContextAccessor;
+        private readonly IMetaDataReferenceProvider _metaDataReferenceProvider;
+        private readonly IApplicationEnvironment _applicationEnvironment;
 
         public DefaultCodeCompiler(IAssemblyLoadContextAccessor assemblyLoadContextAccessor, IMetaDataReferenceProvider metaDataReferenceProvider, IApplicationEnvironment applicationEnvironment)
         {

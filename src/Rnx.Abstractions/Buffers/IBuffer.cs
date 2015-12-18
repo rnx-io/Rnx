@@ -19,9 +19,19 @@ namespace Rnx.Abstractions.Buffers
         event EventHandler Ready;
 
         /// <summary>
+        /// Notifies subscribers when all elements where added to the buffer.
+        /// </summary>
+        event EventHandler AddingComplete;
+
+        /// <summary>
+        /// Notifies subscribers when a new element was added to the buffer
+        /// </summary>
+        event EventHandler<IBufferElement> ElementAdded;
+
+        /// <summary>
         /// Lets a consumer get the elements in the buffer. This is a blocking call, i.e.
         /// the call will return all elements that are currently in the buffer and will block
-        /// until the producer is done adding new elements, i.e. till CompleteAdding is alled
+        /// until the producer is done adding new elements, i.e. till CompleteAdding is called
         /// </summary>
         IEnumerable<IBufferElement> Elements { get; }
 

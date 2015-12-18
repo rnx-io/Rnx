@@ -10,42 +10,54 @@ using System.Linq;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
+    public class DeleteTaskDescriptor : TaskDescriptorBase<DeleteTask>
+    {
+        public string[] GlobPatterns { get; }
+        public bool ShouldKeepEmptyDirectories { get; private set; }
+        public Func<string, bool> Condition { get; private set; }
+
+        public DeleteTaskDescriptor(params string[] globPatterns)
+        {
+            GlobPatterns = globPatterns;
+            Condition = f => true;
+        }
+
+        public DeleteTaskDescriptor KeepEmptyDirectories()
+        {
+            ShouldKeepEmptyDirectories = true;
+            return this;
+        }
+
+        public DeleteTaskDescriptor Where(Func<string, bool> condition)
+        {
+            Condition = condition;
+            return this;
+        }
+    }
+
     public class DeleteTask : RnxTask
     {
-        private string[] _globPatterns;
-        private bool _keepEmptyDirectories;
-        private Func<string, bool> _condition;
+        private readonly DeleteTaskDescriptor _deleteTaskDescriptor;
+        private readonly IGlobMatcher _globMatcher;
+        private readonly IFileSystem _fileSystem;
 
-        public DeleteTask(params string[] globPatterns)
+        public DeleteTask(DeleteTaskDescriptor deleteTaskDescriptor, IGlobMatcher globMatcher, IFileSystem fileSystem)
         {
-            _globPatterns = globPatterns;
-            _condition = f => true;
-        }
-
-        public DeleteTask KeepEmptyDirectories()
-        {
-            _keepEmptyDirectories = true;
-            return this;
-        }
-
-        public DeleteTask Where(Func<string, bool> condition)
-        {
-            _condition = condition;
-            return this;
+            _deleteTaskDescriptor = deleteTaskDescriptor;
+            _globMatcher = globMatcher;
+            _fileSystem = fileSystem;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var dirPath = executionContext.BaseDirectory;
-            var fileSystem = GetService<IFileSystem>(executionContext);
-            var globMatcher = GetService<IGlobMatcher>(executionContext);
             var affectedDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (var file in globMatcher.FindMatches(dirPath, _globPatterns).Where(f => _condition(f.FullPath)))
+            foreach (var file in _globMatcher.FindMatches(dirPath, _deleteTaskDescriptor.GlobPatterns).Where(f => _deleteTaskDescriptor.Condition(f.FullPath)))
             {
-                fileSystem.File.Delete(file.FullPath);
+                _fileSystem.File.Delete(file.FullPath);
 
-                if (!_keepEmptyDirectories)
+                if (!_deleteTaskDescriptor.ShouldKeepEmptyDirectories)
                 {
                     var path = Path.GetDirectoryName(file.Path);
 
@@ -60,9 +72,9 @@ namespace Rnx.Tasks.Core.FileSystem
             foreach (var dir in affectedDirectories.OrderByDescending(f => f.Length))
             {
                 // Delete if directory is empty
-                if (!fileSystem.Directory.EnumerateFileSystemEntries(dir).Any())
+                if (!_fileSystem.Directory.EnumerateFileSystemEntries(dir).Any())
                 {
-                    fileSystem.Directory.Delete(dir);
+                    _fileSystem.Directory.Delete(dir);
                 }
             }
         }

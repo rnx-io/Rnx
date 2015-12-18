@@ -52,8 +52,9 @@ namespace Rnx
 
                 if (rnxProjectDirectoryOption.HasValue())
                 {
-                    logger.LogVerbose($"Rnx project directory specified: {rnxProjectDirectoryOption.Value()}");
-                    rnxProjectDirectory = Path.GetFullPath(Path.Combine(currentDirectory, rnxProjectDirectoryOption.Value()));
+                    var rnxDirOptionValue = rnxProjectDirectoryOption.Value().TrimEnd('"');
+                    logger.LogVerbose($"Rnx project directory specified: {rnxDirOptionValue}");
+                    rnxProjectDirectory = Path.GetFullPath(Path.Combine(currentDirectory, rnxDirOptionValue));
 
                     if (!Directory.Exists(rnxProjectDirectory))
                     {
@@ -64,7 +65,7 @@ namespace Rnx
 
                 if(baseDirectoryOption.HasValue())
                 {
-                    commandLineSettings.BaseDirectory = baseDirectoryOption.Value();
+                    commandLineSettings.BaseDirectory = baseDirectoryOption.Value().TrimEnd('"');
                     logger.LogVerbose($"Base directory specified: {commandLineSettings.BaseDirectory}");
                 }
                     

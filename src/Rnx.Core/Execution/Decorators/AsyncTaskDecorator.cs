@@ -24,7 +24,7 @@ namespace Rnx.Core.Execution.Decorators
         {
             if (typeof(IAsyncTask).IsAssignableFrom(task.GetType()))
             {
-                _asyncTaskManager.RegisterAsyncExecution((IAsyncTask)task, executionContext.UserDefinedTaskName);
+                _asyncTaskManager.RegisterAsyncExecution((IAsyncTask)task, executionContext.RootTaskDescriptor);
             }
 
             decoratorQueue.GetNext()?.Execute(decoratorQueue, task, input, output, executionContext);

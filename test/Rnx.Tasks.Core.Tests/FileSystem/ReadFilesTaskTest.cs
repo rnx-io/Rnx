@@ -12,22 +12,32 @@ using Rnx.Tasks.Core.FileSystem;
 using Rnx.Abstractions.Execution;
 using Rnx.Abstractions.Buffers;
 using Rnx.Core.Buffers;
+using Rnx.Util.FileSystem;
+using Reliak.IO.Abstractions;
 
 namespace Rnx.Tasks.Core.Tests.FileSystem
 {
     public class ReadFilesTaskTest
     {
+        private static readonly string SampleDir1 = Path.Combine(PlatformServices.Default.Application.ApplicationBasePath, "Samples", "Sample1");
+
+        private ReadFilesTask CreateReadFilesTask(ReadFilesTaskDescriptor taskDescriptor)
+        {
+            return new ReadFilesTask(taskDescriptor, new DefaultGlobMatcher(), new DefaultFileSystem(), new DefaultBufferElementFactory(), new NullTaskRunTracker());
+        }
+
         [Fact]
         public void Test_That_Read_Works_And_Relative_Paths_Are_Correct()
         {
             // Arrange
-            var testContext = new TestContext("Sample1");
-            var task = new ReadFilesTask("wwwroot/assets/**/*.js", "!wwwroot/assets/**/*.min.js"); // all js files, except minified files (*.min.js)
-            var taskexecuter = testContext.ServiceProvider.GetService<ITaskExecuter>();
+            var d = new ReadFilesTaskDescriptor("wwwroot/assets/**/*.js", "!wwwroot/assets/**/*.min.js");
+            var task = CreateReadFilesTask(d);
+            var executionContext = new ExecutionContext(d, SampleDir1);
+            var buffer = new BlockingBuffer();
 
             // Act
-            var buffer = new BlockingBuffer();
-            taskexecuter.Execute(task, new NullBuffer(), buffer, testContext.ExecutionContext);
+            task.Execute(new NullBuffer(), buffer, executionContext);
+            buffer.CompleteAdding();
             var results = buffer.Elements.ToArray();
 
             // Assert
@@ -43,13 +53,14 @@ namespace Rnx.Tasks.Core.Tests.FileSystem
         public void Test_That_Base_Directory_Works()
         {
             // Arrange
-            var testContext = new TestContext("Sample1");
-            var task = new ReadFilesTask("wwwroot/assets/**/*.js", "!wwwroot/assets/**/*.min.js").WithBase("assets");
-            var taskexecuter = testContext.ServiceProvider.GetService<ITaskExecuter>();
+            var d = new ReadFilesTaskDescriptor("wwwroot/assets/**/*.js", "!wwwroot/assets/**/*.min.js").WithBase("assets");
+            var task = CreateReadFilesTask(d);
+            var executionContext = new ExecutionContext(d, SampleDir1);
+            var buffer = new BlockingBuffer();
 
             // Act
-            var buffer = new BlockingBuffer();
-            taskexecuter.Execute(task, new NullBuffer(), buffer, testContext.ExecutionContext);
+            task.Execute(new NullBuffer(), buffer, executionContext);
+            buffer.CompleteAdding();
             var results = buffer.Elements.ToArray();
 
             // Assert
@@ -65,13 +76,14 @@ namespace Rnx.Tasks.Core.Tests.FileSystem
         public void Test_That_Where_Condition_Works()
         {
             // Arrange
-            var testContext = new TestContext("Sample1");
-            var task = new ReadFilesTask("wwwroot/assets/**.js", "!wwwroot/assets/**.min.js").Where(f => Path.GetFileName(f).StartsWith("a"));
-            var taskexecuter = testContext.ServiceProvider.GetService<ITaskExecuter>();
+            var d = new ReadFilesTaskDescriptor("wwwroot/assets/**/*.js", "!wwwroot/assets/**/*.min.js").Where(f => Path.GetFileName(f).StartsWith("a"));
+            var task = CreateReadFilesTask(d);
+            var executionContext = new ExecutionContext(d, SampleDir1);
+            var buffer = new BlockingBuffer();
 
             // Act
-            var buffer = new BlockingBuffer();
-            taskexecuter.Execute(task, new NullBuffer(), buffer, testContext.ExecutionContext);
+            task.Execute(new NullBuffer(), buffer, executionContext);
+            buffer.CompleteAdding();
             var results = buffer.Elements.ToArray();
 
             // Assert
@@ -86,13 +98,14 @@ namespace Rnx.Tasks.Core.Tests.FileSystem
         public void Test_That_Single_File_Works()
         {
             // Arrange
-            var testContext = new TestContext("Sample1");
-            var task = new ReadFilesTask("wwwroot/assets/js/jquery.js");
-            var taskexecuter = testContext.ServiceProvider.GetService<ITaskExecuter>();
+            var d = new ReadFilesTaskDescriptor("wwwroot/assets/js/jquery.js");
+            var task = CreateReadFilesTask(d);
+            var executionContext = new ExecutionContext(d, SampleDir1);
+            var buffer = new BlockingBuffer();
 
             // Act
-            var buffer = new BlockingBuffer();
-            taskexecuter.Execute(task, new NullBuffer(), buffer, testContext.ExecutionContext);
+            task.Execute(new NullBuffer(), buffer, executionContext);
+            buffer.CompleteAdding();
             var results = buffer.Elements.ToArray();
 
             // Assert

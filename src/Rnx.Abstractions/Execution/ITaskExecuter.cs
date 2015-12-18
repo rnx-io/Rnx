@@ -13,10 +13,10 @@ namespace Rnx.Abstractions.Execution
         /// <summary>
         /// Executes the given task with the provided parameters
         /// </summary>
-        /// <param name="task">The task to execute</param>
+        /// <param name="taskDescriptor">The task descriptor describing the task that should be executed</param>
         /// <param name="input">The input buffer for the task</param>
         /// <param name="output">The output buffer for the task</param>
         /// <param name="executionContext">The execution context for the task</param>
-        void Execute(ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext);
+        void Execute(ITaskDescriptor taskDescriptor, IBuffer input, IBuffer output, IExecutionContext executionContext);
     }
 }

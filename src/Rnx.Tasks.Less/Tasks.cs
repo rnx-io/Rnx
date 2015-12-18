@@ -7,6 +7,6 @@ namespace Rnx.Tasks.Less
 {
     public static class Tasks
     {
-        public static LessTask Less() => new LessTask();
+        public static LessTaskDescriptor Less() => new LessTaskDescriptor();
     }
 }

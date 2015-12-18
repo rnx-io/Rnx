@@ -9,24 +9,34 @@ using System.Threading.Tasks;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
-    public class RenameTask : RnxTask
+    public class RenameTaskDescriptor : TaskDescriptorBase<RenameTask>
     {
-        private Action<IBufferElement, WriteFileData> _action;
+        public Action<IBufferElement, WriteFileData> Action { get; }
 
-        public RenameTask(Action<WriteFileData> action)
+        public RenameTaskDescriptor(Action<WriteFileData> action)
             : this(new Action<IBufferElement, WriteFileData>((e,f) => action(f)))
         { }
 
-        public RenameTask(Action<IBufferElement, WriteFileData> action)
+        public RenameTaskDescriptor(Action<IBufferElement, WriteFileData> action)
         {
-            _action = action;
+            Action = action;
+        }
+    }
+
+    public class RenameTask : RnxTask
+    {
+        private readonly RenameTaskDescriptor _renameTaskDescriptor;
+
+        public RenameTask(RenameTaskDescriptor renameTaskDescriptor)
+        {
+            _renameTaskDescriptor = renameTaskDescriptor;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             foreach(var e in input.Elements)
             {
-                e.Data.WhenExists<WriteFileData>(f => _action(e, f));
+                e.Data.WhenExists<WriteFileData>(f => _renameTaskDescriptor.Action(e, f));
                 output.Add(e);
             }
         }

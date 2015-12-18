@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rnx.Core.Util;
 
 namespace Rnx.Core.Execution
 {
@@ -15,28 +16,26 @@ namespace Rnx.Core.Execution
     public class DefaultRnxTaskRunner : IRnxTaskRunner
     {
         private ITaskExecuter _taskExecuter;
-        private IServiceProvider _serviceProvider;
 
-        public DefaultRnxTaskRunner(ITaskExecuter taskExecuter, IServiceProvider serviceProvider)
+        public DefaultRnxTaskRunner(ITaskExecuter taskExecuter)
         {
             _taskExecuter = taskExecuter;
-            _serviceProvider = serviceProvider;
         }
 
-        public void Run(IEnumerable<UserDefinedTask> tasks, string baseDirectory)
+        public void Run(IEnumerable<ITaskDescriptor> tasks, string baseDirectory)
         {
             if (tasks.Count() == 1)
             {
                 var buffer = new NullBuffer();
                 var task = tasks.First();
-                _taskExecuter.Execute(task, buffer, buffer, new ExecutionContext(task.Name, baseDirectory, _serviceProvider));
+                _taskExecuter.Execute(task, buffer, buffer, new ExecutionContext(task, baseDirectory));
             }
             else if(tasks.Count() > 1)
             {
                 Parallel.ForEach(tasks, task =>
                 {
                     var buffer = new NullBuffer();
-                    _taskExecuter.Execute(task, buffer, buffer, new ExecutionContext(task.Name, baseDirectory, _serviceProvider));
+                    _taskExecuter.Execute(task, buffer, buffer, new ExecutionContext(task, baseDirectory));
                 });
             }
         }

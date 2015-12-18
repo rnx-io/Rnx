@@ -14,23 +14,23 @@ namespace Rnx.Abstractions.Buffers
     /// </summary>
     public class NullBuffer : IBuffer
     {
-        public int Count => 0;
-
         public event EventHandler Ready;
+        public event EventHandler AddingComplete;
         public event EventHandler<IBufferElement> ElementAdded;
 
         public IEnumerable<IBufferElement> Elements => Enumerable.Empty<IBufferElement>();
 
-        public Partitioner<IBufferElement> ElementsPartitioner => null;
+        public Partitioner<IBufferElement> ElementsPartitioner => Partitioner.Create(Elements);
 
         public void Add(IBufferElement item)
         {
             ElementAdded?.Invoke(this, item);
-        }
+    }
 
         public void CompleteAdding()
         {
             Ready?.Invoke(this, EventArgs.Empty);
+            AddingComplete?.Invoke(this, EventArgs.Empty);
         }
 
         public void CopyTo(IBuffer targetBuffer)

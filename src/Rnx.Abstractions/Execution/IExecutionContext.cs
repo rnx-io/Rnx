@@ -1,4 +1,5 @@
 ﻿using Rnx.Abstractions.Tasks;
+using Rnx.Abstractions.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace Rnx.Abstractions.Execution
         /// <summary>
         /// The name of the parent user defined task
         /// </summary>
-        string UserDefinedTaskName { get; }
+        ITaskDescriptor RootTaskDescriptor { get; }
 
         /// <summary>
         /// All filesystem-based operations inside of tasks should be relative to this directory.
@@ -22,10 +23,5 @@ namespace Rnx.Abstractions.Execution
         /// is "c:/MyProject" then the task can resolve this as "c:/MyProject/MyDocuments/*.pdf"
         /// </summary>
         string BaseDirectory { get; set; }
-
-        /// <summary>
-        /// The IServiceProvider that can be used inside of tasks to retrieve required services
-        /// </summary>
-        IServiceProvider ServiceProvider { get; }
     }
 }

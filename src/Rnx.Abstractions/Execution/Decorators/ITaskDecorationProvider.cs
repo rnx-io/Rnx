@@ -12,8 +12,8 @@ namespace Rnx.Abstractions.Execution.Decorators
     public interface ITaskDecorationProvider
     {
         /// <summary>
-        /// Returns the task decorators that should be used for the task
+        /// Gets or sets the task decorators that should be used for the task
         /// </summary>
-        IEnumerable<ITaskDecorator> TaskDecorators { get; }
+        IEnumerable<ITaskDecorator> TaskDecorators { get; set; }
     }
 }

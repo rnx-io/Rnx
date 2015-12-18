@@ -14,6 +14,8 @@ namespace Rnx.Core.Buffers
     public class BlockingBuffer : IBuffer
     {
         public event EventHandler Ready;
+        public event EventHandler AddingComplete;
+        public event EventHandler<IBufferElement> ElementAdded;
 
         private BlockingCollection<IBufferElement> _blockingCollection;
         private bool _isReady = false;
@@ -31,12 +33,19 @@ namespace Rnx.Core.Buffers
         {
             CheckReadiness();
             _blockingCollection.Add(element);
+            ElementAdded?.Invoke(this, element);
         }
 
         public void CompleteAdding()
         {
+            if(_blockingCollection.IsAddingCompleted)
+            {
+                return;
+            }
+
             CheckReadiness();
             _blockingCollection.CompleteAdding();
+            AddingComplete?.Invoke(this, EventArgs.Empty);
         }
 
         public void CopyTo(IBuffer targetBuffer)

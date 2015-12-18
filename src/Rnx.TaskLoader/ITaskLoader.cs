@@ -17,6 +17,6 @@ namespace Rnx.TaskLoader
         /// </summary>
         /// <param name="taskConfigurationTypes">The types that the loader should examine</param>
         /// <param name="tasksToRun">The names of the tasks that should be run</param>
-        IEnumerable<UserDefinedTask> Load(IEnumerable<Type> taskConfigurationTypes, string[] tasksToRun);
+        IEnumerable<UserDefinedTaskDescriptor> Load(IEnumerable<Type> taskConfigurationTypes, string[] tasksToRun);
     }
 }

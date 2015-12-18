@@ -1,4 +1,6 @@
 ﻿using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Util;
+using Rnx.Core.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,20 +10,17 @@ namespace Rnx.Core.Buffers
 {
     internal class BufferElement : IBufferElement
     {
+        public IDataStore Data { get; private set; } = new DefaultDataStore();
+
         private string _text;
         private Func<Stream> _streamFactory;
 
-        private BufferElement()
-        {
-            Data = new BufferElementData();
-        }
-
-        public BufferElement(Func<Stream> streamFactory) : this()
+        public BufferElement(Func<Stream> streamFactory)
         {
             _streamFactory = streamFactory;
         }
 
-        public BufferElement(string text) : this()
+        public BufferElement(string text)
         {
             Text = text;
             _streamFactory = () => Stream.Null;
@@ -74,8 +73,6 @@ namespace Rnx.Core.Buffers
         }
 
         public bool HasText => _text != null;
-
-        public IBufferElementData Data { get; private set; }
 
         public IBufferElement Clone()
         {

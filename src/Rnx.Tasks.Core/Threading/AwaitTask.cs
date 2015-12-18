@@ -7,28 +7,42 @@ using Rnx.Abstractions.Execution;
 
 namespace Rnx.Tasks.Core.Threading
 {
-    public class AwaitTask : RnxTask
+    public class AwaitTaskDescriptor : TaskDescriptorBase<AwaitTask>
     {
-        private string _executionId;
-        private Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> _action;
+        public string ExecutionId { get; }
+        public Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> Action { get; }
 
-        public AwaitTask()
+        public AwaitTaskDescriptor()
         { }
 
-        public AwaitTask(string executionId, Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> action = null)
+        public AwaitTaskDescriptor(string executionId, Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> action = null)
         {
-            _executionId = executionId;
-            _action = action;
+            if(string.IsNullOrWhiteSpace(executionId))
+            {
+                throw new ArgumentException($"{nameof(executionId)} must not be null or empty");
+            }
+
+            ExecutionId = executionId;
+            Action = action;
+        }
+    }
+
+    public class AwaitTask : RnxTask
+    {
+        private readonly AwaitTaskDescriptor _awaitTaskDescriptor;
+        private readonly IAsyncTaskManager _asyncTaskManager;
+
+        public AwaitTask(AwaitTaskDescriptor awaitTaskDescriptor, IAsyncTaskManager asyncTaskManager)
+        {
+            _awaitTaskDescriptor = awaitTaskDescriptor;
+            _asyncTaskManager = asyncTaskManager;
         }
         
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var asyncManager = GetAsyncTaskManager(executionContext);
-            var eventArgs = asyncManager.WaitForTaskCompletion(executionContext.UserDefinedTaskName, _executionId);
+            var eventArgs = _asyncTaskManager.WaitForTaskCompletion(executionContext.RootTaskDescriptor, _awaitTaskDescriptor.ExecutionId);
 
-            _action?.Invoke(eventArgs, input, output, executionContext);
+            _awaitTaskDescriptor.Action?.Invoke(eventArgs, input, output, executionContext);
         }
-
-        protected virtual IAsyncTaskManager GetAsyncTaskManager(IExecutionContext ctx) => RequireService<IAsyncTaskManager>(ctx);
     }
 }

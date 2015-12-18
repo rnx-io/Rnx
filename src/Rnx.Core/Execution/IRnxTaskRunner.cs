@@ -16,6 +16,6 @@ namespace Rnx.Core.Execution
         /// </summary>
         /// <param name="tasks">The user-defined tasks that should be run</param>
         /// <param name="baseDirectory">The base directory that will be used by all tasks as the "current directory"</param>
-        void Run(IEnumerable<UserDefinedTask> tasks, string baseDirectory);
+        void Run(IEnumerable<ITaskDescriptor> tasks, string baseDirectory);
     }
 }

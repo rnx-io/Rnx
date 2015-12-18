@@ -10,54 +10,68 @@ using System.Threading.Tasks;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
+    public class ReadFilesTaskDescriptor : TaskDescriptorBase<ReadFilesTask>
+    {
+        public string[] GlobPatterns { get; }
+        public Func<string, bool> Condition { get; private set; }
+        public string BaseDirectory { get; private set; }
+        public bool OnlyChangedFilesSinceLastRun { get; private set; }
+
+        public ReadFilesTaskDescriptor(params string[] globPatterns)
+        {
+            GlobPatterns = globPatterns;
+            Condition = new Func<string, bool>(s => true);
+        }
+
+        public ReadFilesTaskDescriptor Where(Func<string, bool> condition)
+        {
+            Condition = condition;
+            return this;
+        }
+
+        public ReadFilesTaskDescriptor WithBase(string baseDirectory)
+        {
+            BaseDirectory = baseDirectory;
+            return this;
+        }
+
+        public ReadFilesTaskDescriptor WhereChangedSinceLastRun()
+        {
+            OnlyChangedFilesSinceLastRun = true;
+            return this;
+        }
+    }
+
     public class ReadFilesTask : RnxTask
     {
-        private string[] _globPatterns;
-        private Func<string, bool> _condition;
-        private string _baseDirectory;
-        private bool _onlyChangedFilesSinceLastRun;
+        private readonly ReadFilesTaskDescriptor _readFilesTaskDescriptor;
+        private readonly IGlobMatcher _globMatcher;
+        private readonly IFileSystem _fileSystem;
+        private readonly IBufferElementFactory _bufferElementFactory;
+        private readonly ITaskRunTracker _taskRunTracker;
 
-        public ReadFilesTask(params string[] globPatterns)
+        public ReadFilesTask(ReadFilesTaskDescriptor readFilesTaskDescriptor, IGlobMatcher globMatcher, IFileSystem fileSystem, IBufferElementFactory bufferElementFactory, ITaskRunTracker taskRunTracker)
         {
-            _globPatterns = globPatterns;
-            _condition = new Func<string, bool>(s => true);
-        }
-        
-        public ReadFilesTask Where(Func<string, bool> condition)
-        {
-            _condition = condition;
-            return this;
-        }
-
-        public ReadFilesTask WithBase(string baseDirectory)
-        {
-            _baseDirectory = baseDirectory;
-            return this;
-        }
-
-        public ReadFilesTask WhereChangedSinceLastRun()
-        {
-            _onlyChangedFilesSinceLastRun = true;
-            return this;
+            _readFilesTaskDescriptor = readFilesTaskDescriptor;
+            _globMatcher = globMatcher;
+            _fileSystem = fileSystem;
+            _bufferElementFactory = bufferElementFactory;
+            _taskRunTracker = taskRunTracker;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var dirPath = executionContext.BaseDirectory;
-            var elementFactory = GetBufferElementFactory(executionContext);
-            var fileSystem = GetFileSystem(executionContext);
-            var globMatcher = GetGlobMatcher(executionContext);
-            var taskRunTracker = GetTaskRunTracker(executionContext);
 
-            foreach(var file in globMatcher.FindMatches(dirPath, _globPatterns).Where(f => _condition(f.FullPath)))
+            foreach(var file in _globMatcher.FindMatches(dirPath, _readFilesTaskDescriptor.GlobPatterns).Where(f => _readFilesTaskDescriptor.Condition(f.FullPath)))
             {
-                if (_onlyChangedFilesSinceLastRun)
+                if (_readFilesTaskDescriptor.OnlyChangedFilesSinceLastRun)
                 {
                     DateTime lastRunOfParentTaskUtc;
 
-                    if (taskRunTracker.LastRunsOfUserDefinedTasks.TryGetValue(executionContext.UserDefinedTaskName, out lastRunOfParentTaskUtc))
+                    if (_taskRunTracker.LastTaskRuns.TryGetValue(executionContext.RootTaskDescriptor, out lastRunOfParentTaskUtc))
                     {
-                        var fi = fileSystem.GetFileInfo(file.FullPath);
+                        var fi = _fileSystem.GetFileInfo(file.FullPath);
 
                         // if file didn't change since our last run, we ignore it
                         if (fi.LastWriteTimeUtc < lastRunOfParentTaskUtc)
@@ -67,18 +81,13 @@ namespace Rnx.Tasks.Core.FileSystem
                     }
                 }
 
-                var relativePath = _baseDirectory != null ? Path.Combine(_baseDirectory, file.Stem) : file.Stem;
-                var newElement = elementFactory.Create(() => fileSystem.File.OpenRead(file.FullPath));
+                var relativePath = _readFilesTaskDescriptor.BaseDirectory != null ? Path.Combine(_readFilesTaskDescriptor.BaseDirectory, file.Stem) : file.Stem;
+                var newElement = _bufferElementFactory.Create(() => _fileSystem.File.OpenRead(file.FullPath));
                 newElement.Data.Add(new ReadFileData(file.FullPath));
                 newElement.Data.Add(new WriteFileData(relativePath));
 
                 output.Add(newElement);
             }
         }
-
-        protected virtual IBufferElementFactory GetBufferElementFactory(IExecutionContext ctx) => RequireService<IBufferElementFactory>(ctx);
-        protected virtual IFileSystem GetFileSystem(IExecutionContext ctx) => RequireService<IFileSystem>(ctx);
-        protected virtual IGlobMatcher GetGlobMatcher(IExecutionContext ctx) => RequireService<IGlobMatcher>(ctx);
-        protected virtual ITaskRunTracker GetTaskRunTracker(IExecutionContext ctx) => RequireService<ITaskRunTracker>(ctx);
     }
 }

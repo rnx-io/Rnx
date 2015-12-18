@@ -7,6 +7,6 @@ namespace Rnx.Tasks.Markdown
 {
     public static class Tasks
     {
-        public static MarkdownTask Markdown() => new MarkdownTask();
+        public static MarkdownTaskDescriptor Markdown() => new MarkdownTaskDescriptor();
     }
 }

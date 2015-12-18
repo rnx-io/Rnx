@@ -8,26 +8,28 @@ using System.Collections.Generic;
 
 namespace Rnx.Tasks.Core.Control
 {
-    public class FilterTask : RnxTask, ITaskDecorationProvider
+    public class FilterTaskDescriptor : TaskDescriptorBase<FilterTask>
     {
-        private Func<IBufferElement, bool> _predicate;
+        public Func<IBufferElement, bool> Predicate { get; }
 
-        public FilterTask(Func<IBufferElement,bool> predicate)
+        public FilterTaskDescriptor(Func<IBufferElement, bool> predicate)
         {
-            _predicate = predicate;
+            Predicate = predicate;
         }
+    }
 
-        public IEnumerable<ITaskDecorator> TaskDecorators
+    public class FilterTask : ControlTask
+    {
+        private readonly FilterTaskDescriptor _filterTaskDescriptor;
+
+        public FilterTask(FilterTaskDescriptor filterTaskDescriptor)
         {
-            get
-            {
-                yield return new NullLoggingTaskDecorator();
-            }
+            _filterTaskDescriptor = filterTaskDescriptor;
         }
-
+        
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            foreach(var e in input.Elements.Where(_predicate))
+            foreach(var e in input.Elements.Where(_filterTaskDescriptor.Predicate))
             {
                 output.Add(e);
             }

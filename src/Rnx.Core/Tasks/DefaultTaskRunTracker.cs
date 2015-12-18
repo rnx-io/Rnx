@@ -11,11 +11,11 @@ namespace Rnx.Core.Tasks
     /// </summary>
     public class DefaultTaskRunTracker : ITaskRunTracker
     {
-        public Dictionary<string, DateTime> LastRunsOfUserDefinedTasks { get; private set; }
+        public Dictionary<ITaskDescriptor, DateTime> LastTaskRuns { get; }
 
         public DefaultTaskRunTracker()
         {
-            LastRunsOfUserDefinedTasks = new Dictionary<string, DateTime>();
+            LastTaskRuns = new Dictionary<ITaskDescriptor, DateTime>();
         }
     }
 }

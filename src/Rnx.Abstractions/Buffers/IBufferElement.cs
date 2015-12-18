@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using Rnx.Abstractions.Util;
+using System.IO;
 
 namespace Rnx.Abstractions.Buffers
 {
@@ -11,7 +12,7 @@ namespace Rnx.Abstractions.Buffers
         /// Contains additional data for the element. Stages in the pipeline can add data
         /// which can then later be extracted by subsequent stages
         /// </summary>
-        IBufferElementData Data { get; }
+        IDataStore Data { get; }
 
         /// <summary>
         /// Represents the underlying Stream for this element, e.g. a FileStream for a file-based element.

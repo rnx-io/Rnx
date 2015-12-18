@@ -9,14 +9,24 @@ using Rnx.Tasks.Core.FileSystem;
 
 namespace Rnx.Tasks.Less
 {
+    public class LessTaskDescriptor : TaskDescriptorBase<LessTask>
+    {
+        public string NewExtension { get; private set; } = ".css";
+
+        public LessTaskDescriptor WithExtension(string newExtension)
+        {
+            NewExtension = newExtension;
+            return this;
+        }
+    }
+
     public class LessTask : RnxTask
     {
-        private string _newExtension = ".css";
+        private readonly LessTaskDescriptor _taskDescriptor;
 
-        public LessTask WithExtension(string newExtension)
+        public LessTask(LessTaskDescriptor taskDescriptor)
         {
-            _newExtension = newExtension;
-            return this;
+            _taskDescriptor = taskDescriptor;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
@@ -27,7 +37,7 @@ namespace Rnx.Tasks.Less
 
                 if (e.Data.Exists<WriteFileData>())
                 {
-                    e.Data.Get<WriteFileData>().Extension = _newExtension;
+                    e.Data.Get<WriteFileData>().Extension = _taskDescriptor.NewExtension;
                 }
 
                 output.Add(e);

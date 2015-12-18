@@ -11,9 +11,9 @@ namespace Rnx.Abstractions.Tasks
     public interface ITaskRunTracker
     {
         /// <summary>
-        /// Dictionary containing the user-defined task as a key and the datetime
+        /// Dictionary containing the task descriptor as a key and the datetime
         /// of the last run as value
         /// </summary>
-        Dictionary<string,DateTime> LastRunsOfUserDefinedTasks { get; }
+        Dictionary<ITaskDescriptor,DateTime> LastTaskRuns { get; }
     }
 }

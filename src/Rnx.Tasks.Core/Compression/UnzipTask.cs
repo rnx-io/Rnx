@@ -9,16 +9,23 @@ using Microsoft.Extensions.DependencyInjection;
 using Rnx.Tasks.Core.FileSystem;
 using System.IO.Compression;
 using Rnx.Abstractions.Tasks;
-using Rnx.Tasks.Core.Compression.Internal;
 
 namespace Rnx.Tasks.Core.Compression
 {
+    public class UnzipTaskDescriptor : TaskDescriptorBase<UnzipTask>
+    { }
+
     public class UnzipTask : RnxTask
     {
+        private readonly IBufferElementFactory _bufferElementFactory;
+
+        public UnzipTask(IBufferElementFactory bufferElementFactory)
+        {
+            _bufferElementFactory = bufferElementFactory;
+        }
+
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferElementFactory = GetBufferElementFactory(executionContext);
-
             Parallel.ForEach(input.ElementsPartitioner, e =>
             {
                 using (var archive = new ZipArchive(e.Stream, ZipArchiveMode.Read, false))
@@ -27,7 +34,7 @@ namespace Rnx.Tasks.Core.Compression
                     foreach (var zipEntry in archive.Entries.Where(f => !string.Equals(f.Name, string.Empty)))
                     {
                         var outputStream = new MemoryStream();
-                        var newElement = bufferElementFactory.Create(() => outputStream);
+                        var newElement = _bufferElementFactory.Create(() => outputStream);
                         newElement.Data.Add(new WriteFileData(zipEntry.FullName));
 
                         using (var zipEntryStream = zipEntry.Open())
@@ -43,7 +50,5 @@ namespace Rnx.Tasks.Core.Compression
                 }
             });
         }
-
-        protected virtual IBufferElementFactory GetBufferElementFactory(IExecutionContext ctx) => RequireService<IBufferElementFactory>(ctx);
     }
 }

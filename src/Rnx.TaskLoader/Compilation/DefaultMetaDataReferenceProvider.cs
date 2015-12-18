@@ -12,9 +12,9 @@ namespace Rnx.TaskLoader.Compilation
 {
     public class DefaultMetaDataReferenceProvider : IMetaDataReferenceProvider
     {
-        private Lazy<IEnumerable<MetadataReference>> _metaDataReferencesLazy;
-        private ILibraryExporter _libraryExporter;
-        private IApplicationEnvironment _applicationEnvironment;
+        private readonly Lazy<IEnumerable<MetadataReference>> _metaDataReferencesLazy;
+        private readonly ILibraryExporter _libraryExporter;
+        private readonly IApplicationEnvironment _applicationEnvironment;
 
         public DefaultMetaDataReferenceProvider(IApplicationEnvironment applicationEnvironment, ILibraryExporter libraryExporter)
         {

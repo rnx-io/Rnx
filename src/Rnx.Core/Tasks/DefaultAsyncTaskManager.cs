@@ -14,44 +14,44 @@ namespace Rnx.Core.Tasks
     /// </summary>
     public class DefaultAsyncTaskManager : IAsyncTaskManager
     {
-        private ConcurrentDictionary<string, ManualResetEventSlim> _tasks;
-        private Dictionary<string, AsyncTaskCompletedEventArgs> _results;
+        private readonly ConcurrentDictionary<AsyncTaskExecutionKey, ManualResetEventSlim> _tasks;
+        private readonly Dictionary<AsyncTaskExecutionKey, AsyncTaskCompletedEventArgs> _results;
 
         public DefaultAsyncTaskManager()
         {
-            _tasks = new ConcurrentDictionary<string, ManualResetEventSlim>();
-            _results = new Dictionary<string, AsyncTaskCompletedEventArgs>();
+            _tasks = new ConcurrentDictionary<AsyncTaskExecutionKey, ManualResetEventSlim>();
+            _results = new Dictionary<AsyncTaskExecutionKey, AsyncTaskCompletedEventArgs>();
         }
 
         public bool HasUncompletedTasks => _tasks.Any();
 
-        public void RegisterAsyncExecution(IAsyncTask asyncTask, string userDefinedTaskName)
+        public void RegisterAsyncExecution(IAsyncTask asyncTask, ITaskDescriptor rootTaskDescriptor)
         {
             // we prefix the name of the user defined task name to the execution id, because
             // maybe the same execution id is used in another user defined task and we want
             // the execution ids to be unique
-            var taskExecutionId = $"{userDefinedTaskName}_{asyncTask.ExecutionId}";
+            var key = new AsyncTaskExecutionKey(rootTaskDescriptor, asyncTask.ExecutionId);
 
             asyncTask.Completed += AsyncTask_Completed;
-            _tasks.TryAdd(taskExecutionId, new ManualResetEventSlim(false));
+            _tasks.TryAdd(key, new ManualResetEventSlim(false));
         }
 
         private void AsyncTask_Completed(object sender, AsyncTaskCompletedEventArgs e)
         {
-            var taskExecutionId = $"{e.ExecutionContext.UserDefinedTaskName}_{e.AsyncTask.ExecutionId}";
+            var key = new AsyncTaskExecutionKey(e.ExecutionContext.RootTaskDescriptor, e.AsyncTask.ExecutionId);
             ManualResetEventSlim completionEvent;
 
-            if( _tasks.TryRemove(taskExecutionId, out completionEvent) )
+            if (_tasks.TryRemove(key, out completionEvent))
             {
-                _results.Add(taskExecutionId, e);
+                _results.Add(key, e);
                 completionEvent.Set();
                 completionEvent.Dispose();
             }
         }
 
-        public void WaitForTaskCompletion(string userDefinedTaskName)
+        public void WaitForTaskCompletion(ITaskDescriptor rootTaskDescriptor)
         {
-            var affectedTasks = _tasks.Where(f => f.Key.StartsWith($"{userDefinedTaskName}_"));
+            var affectedTasks = _tasks.Where(f => f.Key.TaskDescriptor == rootTaskDescriptor);
 
             foreach (var t in affectedTasks.ToArray())
             {
@@ -60,18 +60,18 @@ namespace Rnx.Core.Tasks
             }
         }
 
-        public AsyncTaskCompletedEventArgs WaitForTaskCompletion(string userDefinedTaskName, string executionId)
+        public AsyncTaskCompletedEventArgs WaitForTaskCompletion(ITaskDescriptor rootTaskDescriptor, string executionId)
         {
-            executionId = $"{userDefinedTaskName}_{executionId}";
+            var key = new AsyncTaskExecutionKey(rootTaskDescriptor, executionId);
             ManualResetEventSlim completionEvent;
 
-            if( _tasks.TryGetValue(executionId, out completionEvent) )
+            if( _tasks.TryGetValue(key, out completionEvent) )
             {
                 completionEvent.Wait();
 
                 AsyncTaskCompletedEventArgs resultingEventArgs;
 
-                return _results.TryGetValue(executionId, out resultingEventArgs) ? resultingEventArgs : null;
+                return _results.TryGetValue(key, out resultingEventArgs) ? resultingEventArgs : null;
             }
 
             return null;
@@ -82,6 +82,25 @@ namespace Rnx.Core.Tasks
             while(_tasks.Any())
             {
                 _tasks.Values.First().Wait();
+            }
+        }
+
+        private struct AsyncTaskExecutionKey : IEquatable<AsyncTaskExecutionKey>
+        {
+            private readonly ITaskDescriptor _taskDescriptor;
+            private readonly string _executionId;
+
+            public AsyncTaskExecutionKey(ITaskDescriptor taskDescriptor, string executionId)
+            {
+                _taskDescriptor = taskDescriptor;
+                _executionId = executionId;
+            }
+
+            public ITaskDescriptor TaskDescriptor => _taskDescriptor;
+
+            public bool Equals(AsyncTaskExecutionKey other)
+            {
+                return other._executionId == _executionId && other._taskDescriptor == _taskDescriptor;
             }
         }
     }

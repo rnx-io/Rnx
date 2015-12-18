@@ -1,7 +1,9 @@
-﻿using System;
+﻿using Rnx.Abstractions.Tasks;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Rnx.Abstractions.Util;
 
 namespace Rnx.Abstractions.Execution
 {
@@ -10,15 +12,13 @@ namespace Rnx.Abstractions.Execution
     /// </summary>
     public class ExecutionContext : IExecutionContext
     {
-        public string UserDefinedTaskName { get; set; }
+        public ITaskDescriptor RootTaskDescriptor { get; }
         public string BaseDirectory { get; set; }
-        public IServiceProvider ServiceProvider { get; private set; }
 
-        public ExecutionContext(string userDefinedTaskName, string baseDirectory, IServiceProvider serviceProvider)
+        public ExecutionContext(ITaskDescriptor rootTaskDescriptor, string baseDirectory)
         {
-            UserDefinedTaskName = userDefinedTaskName;
+            RootTaskDescriptor = rootTaskDescriptor;
             BaseDirectory = baseDirectory;
-            ServiceProvider = serviceProvider;
         }
     }
 }

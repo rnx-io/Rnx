@@ -1,26 +1,22 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.PlatformAbstractions;
+using Reliak.IO.Abstractions;
+using Rnx.Abstractions.Buffers;
+using Rnx.Abstractions.Exceptions;
+using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Execution.Decorators;
+using Rnx.Abstractions.Tasks;
+using Rnx.Core.Buffers;
+using Rnx.Core.Execution;
+using Rnx.Core.Execution.Decorators;
+using Rnx.Core.Tasks;
+using Rnx.TaskLoader;
+using Rnx.TaskLoader.Compilation;
+using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Rnx.Abstractions.Exceptions;
-using Microsoft.Extensions.PlatformAbstractions;
-using Rnx.Abstractions.Execution.Decorators;
-using Rnx.Core.Execution;
-using Microsoft.Dnx.Compilation;
-using Rnx.Abstractions.Util;
-using Rnx.Abstractions.Buffers;
-using Rnx.Abstractions.Tasks;
-using Rnx.Core.Tasks;
-using Rnx.Abstractions.Execution;
-using Rnx.Core.Buffers;
-using Rnx.Core.Execution.Decorators;
-using System.IO;
-using Rnx.TaskLoader;
-using Rnx.TaskLoader.Compilation;
-using Reliak.IO.Abstractions;
-using Rnx.Util.FileSystem;
 
 namespace Rnx
 {
@@ -39,7 +35,7 @@ namespace Rnx
         {
             // Setup
             var serviceProvider = ConfigureServices();
-            var logger = serviceProvider.GetService<ILoggerFactory>().CreateLogger("Rnx");
+            var logger = _loggerFactory.CreateLogger("Rnx");
 
             // Load tasks
             var rnxProjectLoader = serviceProvider.GetService<IRnxProjectLoader>();
@@ -50,7 +46,7 @@ namespace Rnx
             // Validate user input from command line
             if (tasksToRun.Length != _commandLineSettings.TasksToRun.Length)
             {
-                var invalidTaskNames = _commandLineSettings.TasksToRun.Except(tasksToRun.Select(f => f.Name), StringComparer.OrdinalIgnoreCase).ToArray();
+                var invalidTaskNames = _commandLineSettings.TasksToRun.Except(tasksToRun.Select(f => f.UserDefinedTaskName), StringComparer.OrdinalIgnoreCase).ToArray();
                 throw new RnxException($"Invalid task name(s): {string.Join(", ", invalidTaskNames)}");
             }
 
@@ -88,20 +84,16 @@ namespace Rnx
                     .AddSingleton<IBufferElementFactory, DefaultBufferElementFactory>()
                     .AddSingleton<IAsyncTaskManager, DefaultAsyncTaskManager>()
                     .AddSingleton<ITaskRunTracker, DefaultTaskRunTracker>()
+                    .AddSingleton<ITaskFactory, DefaultTaskFactory>()
                     .AddSingleton<ITaskDecorator, AsyncTaskDecorator>()
-                    .AddSingleton<ITaskDecorator, BufferTaskDecorator>()
                     .AddSingleton<ITaskDecorator, DefaultLoggingTaskDecorator>()
-                    .AddSingleton<ITaskDecorator, LastRunTaskDecorator>()
                     .AddSingleton<IBufferFactory, BlockingBufferFactory>()
                     .AddSingleton<IFileSystem, DefaultFileSystem>()
                     .AddSingleton<IGlobMatcher, DefaultGlobMatcher>()
+                    .AddSingleton<IRnxTaskRunner, DefaultRnxTaskRunner>()
                     .AddSingleton<ITaskExecuter>(f =>
                     {
-                        return new DefaultTaskExecuter(f.GetServices<ITaskDecorator>());
-                    })
-                    .AddSingleton<IRnxTaskRunner>(f =>
-                    {
-                        return new DefaultRnxTaskRunner(f.GetService<ITaskExecuter>(), f);
+                        return new DefaultTaskExecuter(f.GetService<ITaskFactory>(), f.GetServices<ITaskDecorator>());
                     });
 
             // add existing framework services
@@ -118,12 +110,9 @@ namespace Rnx
             var frameworkServiceProvider = CallContextServiceLocator.Locator.ServiceProvider;
             var runtimeServices = frameworkServiceProvider.GetService<IRuntimeServices>();
 
-            if (runtimeServices != null)
+            foreach (var serviceType in runtimeServices.Services)
             {
-                foreach (var serviceType in runtimeServices.Services)
-                {
-                    yield return new Tuple<Type, object>(serviceType, frameworkServiceProvider.GetService(serviceType));
-                }
+                yield return new Tuple<Type, object>(serviceType, frameworkServiceProvider.GetService(serviceType));
             }
         }
     }

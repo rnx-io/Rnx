@@ -8,51 +8,68 @@ using System.Threading.Tasks;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
+    public class SimpleWatchTaskDescriptor : TaskDescriptorBase<SimpleWatchTask>
+    {
+        public string DirectoryPath { get; }
+        public string SimpleFilter { get; }
+        public Predicate<FileSystemEventArgs> AdvancedFilter { get; private set; }
+        public ITaskDescriptor TaskDescriptorToRun { get; }
+        public bool IncludeSubdirectories { get; }
+        public WatcherChangeTypes ChangeType { get; private set; } = WatcherChangeTypes.All;
+        public Action<FileSystemEventArgs> OnChangeAction { get; private set; }
+
+        public string ExecutionId { get; private set; }
+
+        public SimpleWatchTaskDescriptor(string directoryPath, ITaskDescriptor taskDescriptorToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
+        {
+            DirectoryPath = directoryPath;
+            SimpleFilter = simpleFilter;
+            TaskDescriptorToRun = taskDescriptorToRun;
+            IncludeSubdirectories = includeSubdirectories;
+            ExecutionId = Guid.NewGuid().ToString();
+        }
+
+        public SimpleWatchTaskDescriptor WhereChangeType(WatcherChangeTypes changeType)
+        {
+            ChangeType = changeType;
+            return this;
+        }
+
+        public SimpleWatchTaskDescriptor WithAdvancedFilter(Predicate<FileSystemEventArgs> advancedFilter)
+        {
+            AdvancedFilter = advancedFilter;
+            return this;
+        }
+
+        public SimpleWatchTaskDescriptor OnChange(Action<FileSystemEventArgs> action)
+        {
+            OnChangeAction = action;
+            return this;
+        }
+    }
+
     public class SimpleWatchTask : RnxTask, IAsyncTask
     {
         public event EventHandler<AsyncTaskCompletedEventArgs> Completed;
 
-        private string _directoryPath;
-        private string _simpleFilter;
-        private Predicate<FileSystemEventArgs> _advancedFilter;
-        private ITask _taskToRun;
-        private bool _includeSubdirectories;
-        private WatcherChangeTypes _changeType = WatcherChangeTypes.All;
-        private Action<FileSystemEventArgs> _onChangeAction;
+        private readonly SimpleWatchTaskDescriptor _simpleWatchTaskDescriptor;
+        private readonly IBufferFactory _bufferFactory;
+        private readonly ITaskExecuter _taskExecuter;
 
-        public string ExecutionId { get; private set; }
+        
 
-        public SimpleWatchTask(string directoryPath, ITask taskToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
+        public SimpleWatchTask(SimpleWatchTaskDescriptor simpleWatchTaskDescriptor, IBufferFactory bufferFactory, ITaskExecuter taskExecuter)
         {
-            _directoryPath = directoryPath;
-            _simpleFilter = simpleFilter;
-            _taskToRun = taskToRun;
-            _includeSubdirectories = includeSubdirectories;
+            _simpleWatchTaskDescriptor = simpleWatchTaskDescriptor;
+            _bufferFactory = bufferFactory;
+            _taskExecuter = taskExecuter;
             ExecutionId = Guid.NewGuid().ToString();
         }
 
-        public SimpleWatchTask WhereChangeType(WatcherChangeTypes changeType)
-        {
-            _changeType = changeType;
-            return this;
-        }
-
-        public SimpleWatchTask WithAdvancedFilter(Predicate<FileSystemEventArgs> advancedFilter)
-        {
-            _advancedFilter = advancedFilter;
-            return this;
-        }
-
-        public SimpleWatchTask OnChange(Action<FileSystemEventArgs> action)
-        {
-            _onChangeAction = action;
-            return this;
-        }
+        public string ExecutionId { get; }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var bufferFactory = GetService<IBufferFactory>(executionContext);
-
             Task.Run(() =>
             {
                 var resetEvent = new ManualResetEventSlim(false);
@@ -61,37 +78,37 @@ namespace Rnx.Tasks.Core.FileSystem
                 {
                     var onChangeCallback = new Action<FileSystemEventArgs>(e =>
                     {
-                        if (_advancedFilter == null || _advancedFilter(e))
+                        if (_simpleWatchTaskDescriptor.AdvancedFilter == null || _simpleWatchTaskDescriptor.AdvancedFilter(e))
                         {
-                            _onChangeAction?.Invoke(e);
+                            _simpleWatchTaskDescriptor.OnChangeAction?.Invoke(e);
 
-                            using (var taskToRunOutputBuffer = bufferFactory.Create())
+                            using (var taskToRunOutputBuffer = _bufferFactory.Create())
                             {
-                                ExecuteTask(_taskToRun, new NullBuffer(), taskToRunOutputBuffer, executionContext);
+                                _taskExecuter.Execute(_simpleWatchTaskDescriptor.TaskDescriptorToRun, new NullBuffer(), taskToRunOutputBuffer, executionContext);
                             }
                         }
                     });
 
-                    var watcher = new FileSystemWatcher(_directoryPath, _simpleFilter);
-                    watcher.IncludeSubdirectories = _includeSubdirectories;
+                    var watcher = new FileSystemWatcher(_simpleWatchTaskDescriptor.DirectoryPath, _simpleWatchTaskDescriptor.SimpleFilter);
+                    watcher.IncludeSubdirectories = _simpleWatchTaskDescriptor.IncludeSubdirectories;
                     watcher.EnableRaisingEvents = true;
 
-                    if (_changeType.HasFlag(WatcherChangeTypes.Changed))
+                    if (_simpleWatchTaskDescriptor.ChangeType.HasFlag(WatcherChangeTypes.Changed))
                     {
                         watcher.Changed += (s, e) => onChangeCallback(e);
                     }
 
-                    if (_changeType.HasFlag(WatcherChangeTypes.Created))
+                    if (_simpleWatchTaskDescriptor.ChangeType.HasFlag(WatcherChangeTypes.Created))
                     {
                         watcher.Created += (s, e) => onChangeCallback(e);
                     }
 
-                    if (_changeType.HasFlag(WatcherChangeTypes.Deleted))
+                    if (_simpleWatchTaskDescriptor.ChangeType.HasFlag(WatcherChangeTypes.Deleted))
                     {
                         watcher.Deleted += (s, e) => onChangeCallback(e);
                     }
 
-                    if (_changeType.HasFlag(WatcherChangeTypes.Renamed))
+                    if (_simpleWatchTaskDescriptor.ChangeType.HasFlag(WatcherChangeTypes.Renamed))
                     {
                         watcher.Renamed += (s, e) => onChangeCallback(e);
                     }
