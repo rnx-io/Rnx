@@ -1,14 +1,17 @@
 {
-    "version": "0.2.0-beta",
+    "version": "0.3.1-beta",
     "description": "Rnx.TaskLoader Class Library",
-    "authors": [ "dan" ],
+    "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
     "projectUrl": "",
     "licenseUrl": "",
     "frameworks": {
         "net451": {
             "frameworkAssemblies": {
-                "System.Runtime": "",
+                "System.Runtime": {
+                    "type": "build",
+                    "version": ""
+                },
                 "System.IO": "",
                 "System.Threading.Tasks": "",
                 "System.Text.Encoding": ""
@@ -19,7 +22,6 @@
                 "Microsoft.CSharp": "4.0.1-beta-23516",
                 "System.Collections": "4.0.11-beta-23516",
                 "System.Linq": "4.0.1-beta-23516",
-                "System.Runtime": "4.0.21-beta-23516",
                 "System.Threading": "4.0.11-beta-23516",
                 "System.Threading.Tasks": "4.0.11-beta-23516"
             }
@@ -32,6 +34,7 @@
         "Newtonsoft.Json": "8.0.1-beta3",
         "Reliak.IO.Abstractions": "0.1.0",
         "Rnx.Abstractions": "0.2.4-beta",
-        "Rnx.Util": "0.2.0-beta"
+        "Rnx.Util": "0.2.0-beta",
+        "System.Runtime": "4.0.21-beta-23516"
     }
 }

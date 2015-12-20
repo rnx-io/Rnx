@@ -14,6 +14,7 @@ using Rnx.Tasks.Core.Control;
 //using static Rnx.Tasks.Core.Tasks;
 using Rnx.Tasks.Core.Compression;
 using Rnx.Abstractions.Util;
+using Rnx.Tasks.Core.Process;
 
 namespace Rnx
 {
@@ -29,6 +30,8 @@ namespace Rnx
             //CopyFiles("*.json", "tmp/output")
             //Await("asynctest", (e, i, o, c) => { Console.WriteLine("Await task says: " + e.AsyncTask.Name + " completed. Element: " + e.OutputBuffer.Elements.First().Text); })
         );
+
+        public ITaskDescriptor RunProcess => new StartProcessTaskDescriptor(@"C:\Users\dan\Documents\visual studio 2015\Projects\ConsoleApplication11\ConsoleApplication11\bin\Debug\ConsoleApplication11.exe", "Daniel");
 
         //public ITask ZipTest => Series(
         //    ReadFiles("*.cs"),
@@ -55,7 +58,7 @@ namespace Rnx
                 for (int i = 0; i < 10; ++i)
                 {
                     output.Add(new MyElement(i.ToString()));
-                    System.Threading.Thread.Sleep(50);
+                    //System.Threading.Thread.Sleep(50);
                 }
 
                 //logger.LogWarning($"Hello Rnx! This task was executed inside the user defined task '{executionContext.UserDefinedTaskName}'");

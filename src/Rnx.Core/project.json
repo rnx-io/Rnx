@@ -1,5 +1,5 @@
 {
-    "version": "0.2.1-beta",
+    "version": "0.3.1-beta",
     "description": "Rnx.Core Class Library",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
@@ -8,7 +8,10 @@
     "frameworks": {
         "net451": {
             "frameworkAssemblies": {
-                "System.Runtime": ""
+                "System.Runtime": {
+                    "type": "build",
+                    "version": ""
+                }
             }
         },
         "dotnet5.4": {

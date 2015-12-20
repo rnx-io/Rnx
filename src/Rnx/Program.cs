@@ -4,6 +4,8 @@ using Microsoft.Framework.Runtime.Common.CommandLine;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Linq;
 
 namespace Rnx
 {
@@ -13,19 +15,33 @@ namespace Rnx
 
         public static int Main(string[] args)
         {
-            var entryLogger = new LoggerFactory().AddConsole(LogLevel.Information).CreateLogger("Rnx");
-            entryLogger.LogInformation("Starting Rnx...");
-
             var stopwatch = Stopwatch.StartNew();
-            var rnxApp = new CommandLineApplication { Name = "Rnx", Description = "A cross-platform C# task runner" };
+            var rnxApp = new CommandLineApplication { Name = "Rnx", Description = "A cross-platform C# task runner", FullName = "Rnx" };
             var taskArgument =              rnxApp.Argument("[task1 task2]", "The name of the task(s) that should be executed", true);
             var rnxProjectDirectoryOption = rnxApp.Option("-p|--rnx-project-dir <RNX_PROJECT_DIR>", "Specifies the directory for the Rnx configuration file", CommandOptionType.SingleValue);
             var baseDirectoryOption =       rnxApp.Option("-b|--base-directory <BASE_DIRECTORY>", "Directory path used as base directory", CommandOptionType.SingleValue);
             var silentOption =              rnxApp.Option("-s|--silent", "Disables logging to the console", CommandOptionType.NoValue);
             var logLevelOption =            rnxApp.Option("-l|--log <LOG_LEVEL>", $"Value between 2 (most verbose) and 6 (only critical informations). The default is {CommandLineSettings.DEFAULT_LOG_LEVEL}", CommandOptionType.SingleValue);
+            var versionOption =             rnxApp.Option("-v|--version", "Displays the current version", CommandOptionType.NoValue);
+            var helpOption =                rnxApp.Option("-h|--help", "Displays the help", CommandOptionType.NoValue);
 
             rnxApp.OnExecute(() =>
             {
+                if(versionOption.HasValue())
+                {
+                    var asm = typeof(Program).GetTypeInfo().Assembly;
+                    var versionInfo = asm.GetCustomAttributes<AssemblyInformationalVersionAttribute>().FirstOrDefault();
+
+                    Console.WriteLine($"Rnx version {versionInfo.InformationalVersion}");
+                    return 0;
+                }
+
+                if(helpOption.HasValue())
+                {
+                    rnxApp.ShowHelp();
+                    return 0;
+                }
+
                 string currentDirectory = Directory.GetCurrentDirectory();
                 var commandLineSettings = new CommandLineSettings();
                 commandLineSettings.BaseDirectory = currentDirectory;
@@ -73,6 +89,8 @@ namespace Rnx
 
                 return new RnxApp(commandLineSettings, loggerFactory).Run();
             });
+
+            var entryLogger = new LoggerFactory().AddConsole(LogLevel.Information).CreateLogger("Rnx");
 
             try
             {

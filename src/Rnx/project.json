@@ -1,5 +1,5 @@
 {
-    "version": "0.2.6-beta",
+    "version": "0.3.0-beta",
     "description": "Rnx Console Application",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "rnx", "task", "runner", "build", "tool", "cross plattform" ],
@@ -15,10 +15,10 @@
         "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
-        "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-beta5",
-        "Microsoft.Framework.Runtime": "1.0.0-beta6",
         "Rnx.Util": "1.0.0-*",
-        "Rnx.TaskLoader": "1.0.0-*"
+        "Rnx.TaskLoader": "0.2.0-beta",
+        "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-beta5"
+        
     },
 
     "commands": {
@@ -27,18 +27,17 @@
 
     "frameworks": {
         "dnx451": {
-            "frameworkAssemblies": {
-                "System.Runtime": ""
+            "dependencies": {
+                "System.Threading": "4.0.11-beta-23516"
             }
         },
         "dnxcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.21-beta-23409",
-                "Microsoft.CSharp": "4.0.1-beta-23409",
-                "System.Collections": "4.0.11-beta-23409",
-                "System.Console": "4.0.0-beta-23409",
-                "System.Linq": "4.0.1-beta-23409",
-                "System.Threading": "4.0.11-beta-23409"
+                "Microsoft.CSharp": "4.0.1-beta-23516",
+                "System.Collections": "4.0.11-beta-23516",
+                "System.Console": "4.0.0-beta-23516",
+                "System.Linq": "4.0.1-beta-23516",
+                "System.Runtime": "4.0.21-beta-23516"
             }
         }
     },

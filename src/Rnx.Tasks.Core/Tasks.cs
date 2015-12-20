@@ -5,8 +5,10 @@ using Rnx.Tasks.Core.Compression;
 using Rnx.Tasks.Core.Content;
 using Rnx.Tasks.Core.Control;
 using Rnx.Tasks.Core.FileSystem;
+using Rnx.Tasks.Core.Process;
 using Rnx.Tasks.Core.Threading;
 using System;
+using System.Diagnostics;
 
 namespace Rnx.Tasks.Core
 {
@@ -46,6 +48,10 @@ namespace Rnx.Tasks.Core
         public static WriteFilesTaskDescriptor WriteFiles(string destinationDirectory) => new WriteFilesTaskDescriptor(destinationDirectory);
         public static SimpleWatchTaskDescriptor SimpleWatch(string directoryPath, ITaskDescriptor taskDescriptorToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
                                 => new SimpleWatchTaskDescriptor(directoryPath, taskDescriptorToRun, simpleFilter, includeSubdirectories);
+
+        // Process
+        public static StartProcessTaskDescriptor StartProcess(string filename, string arguments = "", bool waitForExit = true) => new StartProcessTaskDescriptor(filename, arguments, waitForExit);
+        public static StartProcessTaskDescriptor StartProcess(ProcessStartInfo processStartInfo, bool waitForExit = true) => new StartProcessTaskDescriptor(processStartInfo, waitForExit);
 
         // Threading
         public static AsyncTaskDescriptor Async(ITaskDescriptor taskDescriptorToRunAsynchronously, string executionId = null)

@@ -77,6 +77,7 @@ namespace Rnx
         {
             var services = new ServiceCollection();
             services.AddInstance(typeof(ILoggerFactory), _loggerFactory)
+                    .AddSingleton<LastRunTaskDecorator,LastRunTaskDecorator>()
                     .AddSingleton<ICodeCompiler, DefaultCodeCompiler>()
                     .AddSingleton<IMetaDataReferenceProvider, DefaultMetaDataReferenceProvider>()
                     .AddSingleton<ITaskLoader, DefaultTaskLoader>()

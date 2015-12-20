@@ -1,7 +1,7 @@
 {
-  "version": "0.2.0-beta",
+  "version": "0.3.1-beta",
   "description": "Rnx.Util Class Library",
-  "authors": [ "dan" ],
+  "authors": [ "Daniel Kailer" ],
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
