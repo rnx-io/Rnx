@@ -5,8 +5,9 @@ using Rnx.Tasks.Core.Compression;
 using Rnx.Tasks.Core.Content;
 using Rnx.Tasks.Core.Control;
 using Rnx.Tasks.Core.FileSystem;
-using Rnx.Tasks.Core.Process;
+using Rnx.Tasks.Core.Net;
 using Rnx.Tasks.Core.Threading;
+using Rnx.Tasks.Core.Util;
 using System;
 using System.Diagnostics;
 
@@ -20,6 +21,11 @@ namespace Rnx.Tasks.Core
 
         // Content
         public static ReplaceTextTaskDescriptor Replace(string searchText, string replacement) => new ReplaceTextTaskDescriptor(searchText, replacement);
+        public static ReplaceTextTaskDescriptor Replace(string searchText, ITaskDescriptor replacementProvidingTaskDescriptor) => new ReplaceTextTaskDescriptor(searchText, replacementProvidingTaskDescriptor);
+
+        public static AsReplacementForTaskDescriptor AsReplacementFor(string placeHolder, string templateContent) => new AsReplacementForTaskDescriptor(placeHolder, templateContent);
+        public static AsReplacementForTaskDescriptor AsReplacementFor(string placeHolder, ITaskDescriptor templateContentProvidingTaskDescriptor) => new AsReplacementForTaskDescriptor(placeHolder, templateContentProvidingTaskDescriptor);
+
         public static PrependTextTaskDescriptor Prepend(string textToPrepend) => new PrependTextTaskDescriptor(textToPrepend);
         public static AppendTextTaskDescriptor Append(string textToAppend) => new AppendTextTaskDescriptor(textToAppend);
         public static ConcatTextTaskDescriptor Concat(string targetFilepath, string separator = "") => new ConcatTextTaskDescriptor(targetFilepath, separator);
@@ -49,7 +55,13 @@ namespace Rnx.Tasks.Core
         public static SimpleWatchTaskDescriptor SimpleWatch(string directoryPath, ITaskDescriptor taskDescriptorToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
                                 => new SimpleWatchTaskDescriptor(directoryPath, taskDescriptorToRun, simpleFilter, includeSubdirectories);
 
-        // Process
+        // Net
+        public static HttpGetTaskDescriptor HttpGet(string uri, string filePath = null) => new HttpGetTaskDescriptor(uri, filePath);
+
+        // Util
+        public static CreateElementsTaskDescriptor CreateElements(params string[] elementTexts) => new CreateElementsTaskDescriptor(elementTexts);
+        public static ExecuteTaskDescriptor Execute(Action<IBuffer, IBuffer, IExecutionContext> taskAction) => new ExecuteTaskDescriptor(taskAction);
+        public static ExecuteTaskDescriptor Execute(Action<IBufferElement> elementAction) => new ExecuteTaskDescriptor(elementAction);
         public static StartProcessTaskDescriptor StartProcess(string filename, string arguments = "", bool waitForExit = true) => new StartProcessTaskDescriptor(filename, arguments, waitForExit);
         public static StartProcessTaskDescriptor StartProcess(ProcessStartInfo processStartInfo, bool waitForExit = true) => new StartProcessTaskDescriptor(processStartInfo, waitForExit);
 

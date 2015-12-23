@@ -7,8 +7,9 @@ using Rnx.Abstractions.Buffers;
 using Rnx.Abstractions.Execution;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Rnx.Abstractions.Util;
 
-namespace Rnx.Tasks.Core.Process
+namespace Rnx.Tasks.Core.Util
 {
     public class StartProcessTaskDescriptor : TaskDescriptorBase<StartProcessTask>
     {
@@ -18,7 +19,7 @@ namespace Rnx.Tasks.Core.Process
         public StartProcessTaskDescriptor(string filename, string arguments = "", bool waitForExit = true, bool redirectOutput = true)
             : this(new ProcessStartInfo(filename, arguments)
             {
-                CreateNoWindow = true, RedirectStandardOutput = redirectOutput, RedirectStandardError = redirectOutput
+                CreateNoWindow = true, RedirectStandardOutput = redirectOutput, RedirectStandardError = redirectOutput, UseShellExecute = false
             }, waitForExit)
         { }
 
@@ -32,17 +33,15 @@ namespace Rnx.Tasks.Core.Process
     public class StartProcessTask : RnxTask
     {
         private readonly StartProcessTaskDescriptor _taskDescriptor;
-        private readonly ILoggerFactory _loggerFactory;
 
-        public StartProcessTask(StartProcessTaskDescriptor taskDescriptor, ILoggerFactory loggerFactory)
+        public StartProcessTask(StartProcessTaskDescriptor taskDescriptor)
         {
             _taskDescriptor = taskDescriptor;
-            _loggerFactory = loggerFactory;
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var logger = _loggerFactory.CreateLogger("StartProcess");
+            var logger = LoggingContext.Current.LoggerFactory.CreateLogger("StartProcess");
             var process = new System.Diagnostics.Process();
             process.StartInfo = _taskDescriptor.ProcessStartInfo;
 

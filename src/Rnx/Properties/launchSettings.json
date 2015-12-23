@@ -2,7 +2,7 @@
   "profiles": {
     "Rnx": {
       "commandName": "Rnx",
-      "commandLineArgs": "PrintConsole -l 2"
+      "commandLineArgs": "Log"
     }
   }
 }

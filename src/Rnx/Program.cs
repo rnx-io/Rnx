@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Linq;
+using Rnx.Abstractions.Util;
 
 namespace Rnx
 {
@@ -56,9 +57,8 @@ namespace Rnx
                     commandLineSettings.LogLevel = EnsureValidLogLevel(logLevelOption.Value());
                 }
 
-                var loggerFactory = new LoggerFactory().AddConsole((LogLevel)commandLineSettings.LogLevel);
-                var logger = loggerFactory.CreateLogger("Rnx");
-
+                LoggingContext.Current = new ConfigurableLoggingContext(new LoggerFactory().AddConsole((LogLevel)commandLineSettings.LogLevel));
+                var logger = LoggingContext.Current.LoggerFactory.CreateLogger("Rnx");
                 commandLineSettings.TasksToRun = string.IsNullOrWhiteSpace(taskArgument.Value) ? new[] { DEFAULT_TASK_NAME }
                                                                                                : taskArgument.Values.ToArray();
                 logger.LogVerbose($"Current dirctory: {currentDirectory}");
@@ -87,7 +87,7 @@ namespace Rnx
                     
                 commandLineSettings.RnxProjectDirectory = rnxProjectDirectory;
 
-                return new RnxApp(commandLineSettings, loggerFactory).Run();
+                return new RnxApp(commandLineSettings).Run();
             });
 
             var entryLogger = new LoggerFactory().AddConsole(LogLevel.Information).CreateLogger("Rnx");
@@ -98,7 +98,15 @@ namespace Rnx
             }
             catch (Exception ex)
             {
-                entryLogger.LogCritical($"Task execution error: {ex.Message}");
+                var errorMessage = ex.Message;
+
+                if (ex.InnerException != null)
+                {
+                    errorMessage += Environment.NewLine + ex.InnerException.Message;
+                }
+
+                entryLogger.LogCritical($"Task execution error: {errorMessage}");
+                
                 return 1;
             }
             finally

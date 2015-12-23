@@ -1,7 +1,9 @@
-﻿using Reliak.IO.Abstractions;
+﻿using Microsoft.Extensions.Logging;
+using Reliak.IO.Abstractions;
 using Rnx.Abstractions.Buffers;
 using Rnx.Abstractions.Execution;
 using Rnx.Abstractions.Tasks;
+using Rnx.Abstractions.Util;
 using Rnx.Util.FileSystem;
 using System;
 using System.IO;
@@ -49,6 +51,7 @@ namespace Rnx.Tasks.Core.FileSystem
         private readonly IFileSystem _fileSystem;
         private readonly IBufferElementFactory _bufferElementFactory;
         private readonly ITaskRunTracker _taskRunTracker;
+        private readonly ILogger _logger;
 
         public ReadFilesTask(ReadFilesTaskDescriptor readFilesTaskDescriptor, IGlobMatcher globMatcher, IFileSystem fileSystem, IBufferElementFactory bufferElementFactory, ITaskRunTracker taskRunTracker)
         {
@@ -57,13 +60,20 @@ namespace Rnx.Tasks.Core.FileSystem
             _fileSystem = fileSystem;
             _bufferElementFactory = bufferElementFactory;
             _taskRunTracker = taskRunTracker;
+            _logger = LoggingContext.Current.LoggerFactory.CreateLogger(nameof(ReadFilesTask));
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var dirPath = executionContext.BaseDirectory;
+            var matches = _globMatcher.FindMatches(dirPath, _readFilesTaskDescriptor.GlobPatterns).Where(f => _readFilesTaskDescriptor.Condition(f.FullPath)).ToArray();
 
-            foreach(var file in _globMatcher.FindMatches(dirPath, _readFilesTaskDescriptor.GlobPatterns).Where(f => _readFilesTaskDescriptor.Condition(f.FullPath)))
+            if(matches.Length == 0)
+            {
+                _logger.LogVerbose($"No files found for search query: {string.Join(", ", _readFilesTaskDescriptor.GlobPatterns)}");
+            }
+
+            foreach (var file in matches)
             {
                 if (_readFilesTaskDescriptor.OnlyChangedFilesSinceLastRun)
                 {

@@ -1,5 +1,5 @@
 {
-    "version": "0.3.1-beta",
+    "version": "0.4.0-beta",
     "description": "Rnx.TaskLoader Class Library",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
@@ -33,8 +33,8 @@
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Newtonsoft.Json": "8.0.1-beta3",
         "Reliak.IO.Abstractions": "0.1.0",
-        "Rnx.Abstractions": "0.2.4-beta",
-        "Rnx.Util": "0.2.0-beta",
+        "Rnx.Abstractions": "0.4.0-beta",
+        "Rnx.Util": "0.4.0-beta",
         "System.Runtime": "4.0.21-beta-23516"
     }
 }

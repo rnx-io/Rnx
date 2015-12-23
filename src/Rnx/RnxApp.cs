@@ -7,6 +7,7 @@ using Rnx.Abstractions.Exceptions;
 using Rnx.Abstractions.Execution;
 using Rnx.Abstractions.Execution.Decorators;
 using Rnx.Abstractions.Tasks;
+using Rnx.Abstractions.Util;
 using Rnx.Core.Buffers;
 using Rnx.Core.Execution;
 using Rnx.Core.Execution.Decorators;
@@ -23,19 +24,17 @@ namespace Rnx
     public class RnxApp
     {
         private readonly CommandLineSettings _commandLineSettings;
-        private readonly ILoggerFactory _loggerFactory;
 
-        public RnxApp(CommandLineSettings commandLineSettings, ILoggerFactory loggerFactory)
+        public RnxApp(CommandLineSettings commandLineSettings)
         {
             _commandLineSettings = commandLineSettings;
-            _loggerFactory = loggerFactory;
         }
 
         public int Run()
         {
             // Setup
             var serviceProvider = ConfigureServices();
-            var logger = _loggerFactory.CreateLogger("Rnx");
+            var logger = LoggingContext.Current.LoggerFactory.CreateLogger("Rnx");
 
             // Load tasks
             var rnxProjectLoader = serviceProvider.GetService<IRnxProjectLoader>();
@@ -76,8 +75,7 @@ namespace Rnx
         private IServiceProvider ConfigureServices()
         {
             var services = new ServiceCollection();
-            services.AddInstance(typeof(ILoggerFactory), _loggerFactory)
-                    .AddSingleton<LastRunTaskDecorator,LastRunTaskDecorator>()
+            services.AddSingleton<LastRunTaskDecorator,LastRunTaskDecorator>()
                     .AddSingleton<ICodeCompiler, DefaultCodeCompiler>()
                     .AddSingleton<IMetaDataReferenceProvider, DefaultMetaDataReferenceProvider>()
                     .AddSingleton<ITaskLoader, DefaultTaskLoader>()

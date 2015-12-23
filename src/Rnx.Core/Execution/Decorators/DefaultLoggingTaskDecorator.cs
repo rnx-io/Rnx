@@ -9,6 +9,7 @@ using Rnx.Abstractions.Tasks;
 using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Rnx.Abstractions.Util;
 
 namespace Rnx.Core.Execution.Decorators
 {
@@ -17,17 +18,11 @@ namespace Rnx.Core.Execution.Decorators
     /// </summary>
     public class DefaultLoggingTaskDecorator : AbstractLoggingTaskDecorator
     {
-        private readonly ILoggerFactory _loggerFactory;
-
-        public DefaultLoggingTaskDecorator(ILoggerFactory loggerFactory)
-        {
-            _loggerFactory = loggerFactory;
-        }
-
         public override void Execute(IDecoratorQueue decoratorQueue, ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var taskName = task.Name;
-            var logger = _loggerFactory.CreateLogger(taskName);
+            var logger = LoggingContext.Current.LoggerFactory.CreateLogger(taskName);
+            
             logger.LogInformation("Starting task {0}...", taskName);
 
             var stopwatch = Stopwatch.StartNew();

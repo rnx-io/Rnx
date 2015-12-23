@@ -14,7 +14,8 @@ using Rnx.Tasks.Core.Control;
 //using static Rnx.Tasks.Core.Tasks;
 using Rnx.Tasks.Core.Compression;
 using Rnx.Abstractions.Util;
-using Rnx.Tasks.Core.Process;
+using Rnx.Tasks.Core.Net;
+using Rnx.Tasks.Core.Util;
 
 namespace Rnx
 {
@@ -32,6 +33,17 @@ namespace Rnx
         );
 
         public ITaskDescriptor RunProcess => new StartProcessTaskDescriptor(@"C:\Users\dan\Documents\visual studio 2015\Projects\ConsoleApplication11\ConsoleApplication11\bin\Debug\ConsoleApplication11.exe", "Daniel");
+
+        public ITaskDescriptor Download => new SeriesTaskDescriptor(new HttpGetTaskDescriptor("https://github.com/rnx-io/Rnx/archive/master.zip", "blub.zip"),
+                                    new WriteFilesTaskDescriptor("tmp"));
+
+        public ITaskDescriptor Log => new SeriesTaskDescriptor
+            (
+                new CreateElementsTaskDescriptor("a", "b"),
+                new ExecuteTaskDescriptor((e) => e.Text = e.Text.ToUpper()),
+                new SetFilePathTaskDescriptor( e => e.Text + ".txt"),
+                new WriteFilesTaskDescriptor("tmp")
+            );
 
         //public ITask ZipTest => Series(
         //    ReadFiles("*.cs"),
@@ -53,8 +65,6 @@ namespace Rnx
         {
             public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
             {
-                //var logger = GetService<ILoggerFactory>(executionContext).CreateLogger(executionContext.UserDefinedTaskName);
-
                 for (int i = 0; i < 10; ++i)
                 {
                     output.Add(new MyElement(i.ToString()));

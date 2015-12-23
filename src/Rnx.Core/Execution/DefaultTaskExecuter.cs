@@ -48,14 +48,19 @@ namespace Rnx.Core.Execution
 
         void ITaskDecorator.Execute(IDecoratorQueue decoratorQueue, ITask task, IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            // this is the final point where a task will be actually executed
-            task.Execute(input, output, executionContext);
+            try
+            {
+                // this is the final point where a task will be actually executed
+                task.Execute(input, output, executionContext);
+            }
+            finally
+            {
+                // make sure that remaining elements of the input buffer are copied to the output buffer
+                input?.CopyTo(output);
 
-            // make sure that remaining elements of the input buffer are copied to the output buffer
-            input?.CopyTo(output);
-
-            // make sure that this is called, otherwise the next pipeline stage would wait forever
-            output?.CompleteAdding();
+                // make sure that this is called, otherwise the next pipeline stage would wait forever
+                output?.CompleteAdding();
+            }
         }
     }
 }

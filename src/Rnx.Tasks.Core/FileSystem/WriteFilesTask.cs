@@ -8,6 +8,7 @@ using Rnx.Abstractions.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Rnx.Abstractions.Buffers;
 using Reliak.IO.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Rnx.Tasks.Core.FileSystem
 {
@@ -25,16 +26,19 @@ namespace Rnx.Tasks.Core.FileSystem
     {
         private readonly WriteFilesTaskDescriptor _writeFilesTaskDescriptor;
         private readonly IFileSystem _fileSystem;
+        private readonly ILogger _logger;
 
         public WriteFilesTask(WriteFilesTaskDescriptor writeFilesTaskDescriptor, IFileSystem fileSystem)
         {
             _writeFilesTaskDescriptor = writeFilesTaskDescriptor;
             _fileSystem = fileSystem;
+            _logger = LoggingContext.Current.LoggerFactory.CreateLogger(nameof(WriteFilesTask));
         }
 
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var baseDir = executionContext.BaseDirectory;
+            var numberOfWrittenFiles = 0;
 
             foreach(var e in input.Elements)
             {
@@ -61,10 +65,14 @@ namespace Rnx.Tasks.Core.FileSystem
 
                     WriteBufferElement(e, outputFilename);
                     writeFileData.WrittenFilename = outputFilename;
+
+                    numberOfWrittenFiles++;
                 }
 
                 output.Add(e);
             }
+
+            _logger.LogVerbose($"{numberOfWrittenFiles} file(s) written");
         }
 
         private void WriteBufferElement(IBufferElement bufferElement, string outputFilename)
