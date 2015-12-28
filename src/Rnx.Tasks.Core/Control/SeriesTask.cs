@@ -57,7 +57,7 @@ namespace Rnx.Tasks.Core.Control
             }
 
             var numberOfConcurrentTasks = Math.Min(_taskDescriptor.TaskDescriptors.Length, _taskDescriptor.MaxDegreeOfParallelism);
-            SemaphoreSlim slimSemaphore = new SemaphoreSlim(numberOfConcurrentTasks);
+            var slimSemaphore = new SemaphoreSlim(numberOfConcurrentTasks);
             Action firstAction = null;
             var subsequentActions = new BlockingCollection<Action>();
             var runningTasks = new List<Task>();
@@ -69,10 +69,10 @@ namespace Rnx.Tasks.Core.Control
                 var taskDescriptor = _taskDescriptor.TaskDescriptors[i];
 
                 // input buffer of current task is the output buffer of the last task
-                IBuffer taskInputBuffer = buffers.Last();
+                var taskInputBuffer = buffers.Last();
 
                 // if we are at the last task, use the incoming output buffer, otherwise create a new buffer
-                IBuffer taskOutputBuffer = i == (numberOfTasks - 1) ? output : _bufferFactory.Create();
+                var taskOutputBuffer = i == (numberOfTasks - 1) ? output : _bufferFactory.Create();
                 Action executeAction = () =>
                 {
                     _taskExecuter.Execute(taskDescriptor, taskInputBuffer, taskOutputBuffer, executionContext);
