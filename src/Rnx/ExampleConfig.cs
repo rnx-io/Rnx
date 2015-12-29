@@ -1,6 +1,4 @@
-﻿#if DEBUG
-
-using Rnx.Abstractions.Buffers;
+﻿using Rnx.Abstractions.Buffers;
 using Rnx.Abstractions.Execution;
 using Rnx.Abstractions.Tasks;
 using Microsoft.Extensions.Logging;
@@ -124,4 +122,3 @@ namespace Rnx
         }
     }
 }
-#endif

@@ -8,12 +8,12 @@ namespace Rnx.TaskLoader
     /// <summary>
     /// Responsible for loading all types that provide Rnx tasks.
     /// </summary>
-    public interface IRnxProjectLoader
+    public interface ITaskTypeLoader
     {
         /// <summary>
         /// Returns all types that contain configurations for Rnx tasks
         /// </summary>
-        /// <param name="rnxProjectDirectory">The directory where the type loader is looking for informations on what types to load</param>
-        IEnumerable<Type> Load(string rnxProjectDirectory);
+        /// <param name="searchPatterns">The globb searchPatterns where the type loader is looking for informations on what types to load</param>
+        IEnumerable<Type> Load(string baseDirectory, params string[] searchPatterns);
     }
 }

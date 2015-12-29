@@ -37,8 +37,8 @@ namespace Rnx
             var logger = LoggingContext.Current.LoggerFactory.CreateLogger("Rnx");
 
             // Load tasks
-            var rnxProjectLoader = serviceProvider.GetService<IRnxProjectLoader>();
-            var configTypes = rnxProjectLoader.Load(_commandLineSettings.RnxProjectDirectory);
+            var rnxProjectLoader = serviceProvider.GetService<ITaskTypeLoader>();
+            var configTypes = rnxProjectLoader.Load(_commandLineSettings.BaseDirectory, _commandLineSettings.TaskSourceCodeGlobPaths);
             var taskLoader = serviceProvider.GetService<ITaskLoader>();
             var tasksToRun = taskLoader.Load(configTypes, _commandLineSettings.TasksToRun).ToArray();
 
@@ -79,7 +79,7 @@ namespace Rnx
                     .AddSingleton<ICodeCompiler, DefaultCodeCompiler>()
                     .AddSingleton<IMetaDataReferenceProvider, DefaultMetaDataReferenceProvider>()
                     .AddSingleton<ITaskLoader, DefaultTaskLoader>()
-                    .AddSingleton<IRnxProjectLoader, DefaultRnxProjectLoader>()
+                    .AddSingleton<ITaskTypeLoader, DefaultTaskTypeLoader>()
                     .AddSingleton<IBufferElementFactory, DefaultBufferElementFactory>()
                     .AddSingleton<IAsyncTaskManager, DefaultAsyncTaskManager>()
                     .AddSingleton<ITaskRunTracker, DefaultTaskRunTracker>()

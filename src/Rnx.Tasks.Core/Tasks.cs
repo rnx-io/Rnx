@@ -64,6 +64,9 @@ namespace Rnx.Tasks.Core
         public static ExecuteTaskDescriptor Execute(Action<IBufferElement> elementAction) => new ExecuteTaskDescriptor(elementAction);
         public static StartProcessTaskDescriptor StartProcess(string filename, string arguments = "", bool waitForExit = true) => new StartProcessTaskDescriptor(filename, arguments, waitForExit);
         public static StartProcessTaskDescriptor StartProcess(ProcessStartInfo processStartInfo, bool waitForExit = true) => new StartProcessTaskDescriptor(processStartInfo, waitForExit);
+        public static LogTaskDescriptor Log(string message) => new LogTaskDescriptor(message);
+        public static LogTaskDescriptor LogWarning(string message) => new LogTaskDescriptor(message).AsWarning();
+        public static LogTaskDescriptor LogError(string message) => new LogTaskDescriptor(message).AsError();
 
         // Threading
         public static AsyncTaskDescriptor Async(ITaskDescriptor taskDescriptorToRunAsynchronously, string executionId = null)

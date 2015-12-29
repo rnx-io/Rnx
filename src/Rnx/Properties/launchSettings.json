@@ -2,7 +2,7 @@
   "profiles": {
     "Rnx": {
       "commandName": "Rnx",
-      "commandLineArgs": "Log"
+      "commandLineArgs": "--tasks -f ExampleConfig.cs"
     }
   }
 }

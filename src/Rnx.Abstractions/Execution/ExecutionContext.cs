@@ -13,7 +13,7 @@ namespace Rnx.Abstractions.Execution
     public class ExecutionContext : IExecutionContext
     {
         public ITaskDescriptor RootTaskDescriptor { get; }
-        public string BaseDirectory { get; set; }
+        public string BaseDirectory { get; }
 
         public ExecutionContext(ITaskDescriptor rootTaskDescriptor, string baseDirectory)
         {

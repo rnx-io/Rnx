@@ -22,6 +22,6 @@ namespace Rnx.Abstractions.Execution
         /// For example, if a user specifies that all PDFs should be read from "MyDocuments/*.pdf" and the base directory
         /// is "c:/MyProject" then the task can resolve this as "c:/MyProject/MyDocuments/*.pdf"
         /// </summary>
-        string BaseDirectory { get; set; }
+        string BaseDirectory { get; }
     }
 }
