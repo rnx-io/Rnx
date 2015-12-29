@@ -28,7 +28,7 @@ namespace Rnx.TaskLoader.Compilation
             IEnumerable<string> preprocessorSymbols = _applicationEnvironment.Configuration.ToLower().Contains("debug") ? new string[] { "DEBUG" }
                                                                                                                         : Enumerable.Empty<string>();
             CSharpCompilation compilation = CSharpCompilation.Create(
-                assemblyName: Path.GetRandomFileName(),
+                assemblyName: Guid.NewGuid().ToString(),
                 syntaxTrees: BuildSyntaxTrees(sourceCodes, new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols)),
                 references: _metaDataReferenceProvider.GetCurrentMetaDataReferences(),
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug, warningLevel: 0));

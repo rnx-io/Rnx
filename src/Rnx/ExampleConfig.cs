@@ -43,6 +43,8 @@ namespace Rnx
                 new WriteFilesTaskDescriptor("tmp")
             );
 
+        public ITaskDescriptor LogTest => new LogTaskDescriptor("Hello World!");
+
         //public ITask ZipTest => Series(
         //    ReadFiles("*.cs"),
         //    Zip("test.zip"),

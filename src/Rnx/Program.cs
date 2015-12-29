@@ -5,6 +5,7 @@ using Rnx.Abstractions.Util;
 using Rnx.TaskLoader;
 using Rnx.Util.FileSystem;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -136,6 +137,13 @@ namespace Rnx
                 entryLogger.LogCritical($"Task execution error: {errorMessage}");
                 
                 return 1;
+            }
+            finally
+            {
+                if(Debugger.IsAttached)
+                {
+                    Console.ReadLine();
+                }
             }
         }
                 

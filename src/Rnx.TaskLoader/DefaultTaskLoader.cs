@@ -2,6 +2,7 @@
 using Rnx.Abstractions.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
@@ -23,14 +24,14 @@ namespace Rnx.TaskLoader
             foreach (var e in taskConfigurationTypes.Select(f => new { Type = f, Instance = ActivatorUtilities.CreateInstance(_serviceProvider, f) }))
             {
                 foreach (var t in e.Type.GetTypeInfo().DeclaredMethods
-                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.ReturnType) && checkName(f))
+                                        .Where(f => f.IsPublic && typeof(ITaskDescriptor).IsAssignableFrom(f.ReturnType) && checkName(f))
                                         .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.Invoke(e.Instance, null))))
                 {
                     yield return t;
                 }
 
                 foreach (var t in e.Type.GetTypeInfo().DeclaredProperties
-                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.PropertyType) && checkName(f))
+                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.PropertyType) && f.GetMethod.IsPublic && checkName(f))
                                         .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.GetGetMethod().Invoke(e.Instance, null))))
                 {
                     yield return t;

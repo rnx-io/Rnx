@@ -17,6 +17,7 @@ using Rnx.TaskLoader.Compilation;
 using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Rnx
@@ -32,15 +33,27 @@ namespace Rnx
 
         public int Run()
         {
+            var stopWatch = Stopwatch.StartNew();
+
             // Setup
             var serviceProvider = ConfigureServices();
             var logger = LoggingContext.Current.LoggerFactory.CreateLogger("Rnx");
 
+            logger.LogVerbose($"Services initialized: {stopWatch.ElapsedMilliseconds} ms");
+            stopWatch.Restart();
+
             // Load tasks
-            var rnxProjectLoader = serviceProvider.GetService<ITaskTypeLoader>();
-            var configTypes = rnxProjectLoader.Load(_commandLineSettings.BaseDirectory, _commandLineSettings.TaskSourceCodeGlobPaths);
+            var taskTypeLoader = serviceProvider.GetService<ITaskTypeLoader>();
+            var configTypes = taskTypeLoader.Load(_commandLineSettings.BaseDirectory, _commandLineSettings.TaskSourceCodeGlobPaths).ToArray();
+
+            logger.LogVerbose($"Tasks types loaded: {stopWatch.ElapsedMilliseconds} ms");
+            stopWatch.Restart();
+
             var taskLoader = serviceProvider.GetService<ITaskLoader>();
             var tasksToRun = taskLoader.Load(configTypes, _commandLineSettings.TasksToRun).ToArray();
+
+            logger.LogVerbose($"Tasks loaded: {stopWatch.ElapsedMilliseconds} ms");
+            stopWatch.Restart();
 
             // Validate user input from command line
             if (tasksToRun.Length != _commandLineSettings.TasksToRun.Length)
@@ -67,6 +80,7 @@ namespace Rnx
                 asyncTaskManager.WaitAll();
             }
 
+            logger.LogVerbose($"Tasks complete: {stopWatch.ElapsedMilliseconds} ms");
             logger.LogInformation("All tasks completed.");
 
             return 0;
