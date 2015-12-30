@@ -9,8 +9,8 @@ namespace Rnx.Tasks.Core.Content
 {
     public class ConcatTextTaskDescriptor : TaskDescriptorBase<ConcatTextTask>
     {
-        public string TargetFilepath { get; }
-        public string Separator { get; }
+        internal string TargetFilepath { get; }
+        internal string Separator { get; }
 
         public ConcatTextTaskDescriptor(string targetFilepath, string separator = "")
         {

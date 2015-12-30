@@ -10,8 +10,8 @@ namespace Rnx.Tasks.Core.Util
 {
     public class ExecuteTaskDescriptor : TaskDescriptorBase<ExecuteTask>
     {
-        public Action<IBuffer,IBuffer,IExecutionContext> TaskAction { get; private set; }
-        public Action<IBufferElement> ElementAction { get; private set; }
+        internal Action<IBuffer,IBuffer,IExecutionContext> TaskAction { get; private set; }
+        internal Action<IBufferElement> ElementAction { get; private set; }
 
         public ExecuteTaskDescriptor(Action<IBuffer, IBuffer, IExecutionContext> taskAction)
         {

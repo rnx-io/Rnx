@@ -11,8 +11,8 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class DeleteDirTaskDescriptor : TaskDescriptorBase<DeleteDirTask>
     {
-        public string[] DirectoryPaths { get; }
-        public bool Recursive { get; private set; } = true;
+        internal string[] DirectoryPaths { get; }
+        internal bool Recursive { get; private set; } = true;
 
         public DeleteDirTaskDescriptor(params string[] directoryPaths)
         {

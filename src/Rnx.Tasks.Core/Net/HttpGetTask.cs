@@ -13,8 +13,8 @@ namespace Rnx.Tasks.Core.Net
 {
     public class HttpGetTaskDescriptor : TaskDescriptorBase<HttpGetTask>
     {
-        public string Uri { get; }
-        public string FilePath { get; }
+        internal string Uri { get; }
+        internal string FilePath { get; }
 
         public HttpGetTaskDescriptor(string uri, string filePath = null)
         {

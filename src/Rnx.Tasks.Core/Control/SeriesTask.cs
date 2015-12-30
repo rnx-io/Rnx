@@ -14,7 +14,7 @@ namespace Rnx.Tasks.Core.Control
     {
         public const int DEFAULT_MAX_DEGREE_OF_PARALLELISM = 8;
 
-        public int MaxDegreeOfParallelism { get; }
+        internal int MaxDegreeOfParallelism { get; }
 
         public SeriesTaskDescriptor(int maxDegreeOfParallelism, params ITaskDescriptor[] taskDescriptors)
             : base(taskDescriptors)

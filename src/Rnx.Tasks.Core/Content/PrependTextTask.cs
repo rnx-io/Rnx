@@ -9,7 +9,7 @@ namespace Rnx.Tasks.Core.Content
 {
     public class PrependTextTaskDescriptor : TaskDescriptorBase<PrependTextTask>
     {
-        public string TextToPrepend;
+        internal string TextToPrepend;
 
         public PrependTextTaskDescriptor(string textToPrepend)
         {

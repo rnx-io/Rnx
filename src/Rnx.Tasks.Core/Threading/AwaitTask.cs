@@ -9,8 +9,8 @@ namespace Rnx.Tasks.Core.Threading
 {
     public class AwaitTaskDescriptor : TaskDescriptorBase<AwaitTask>
     {
-        public string ExecutionId { get; }
-        public Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> Action { get; }
+        internal string ExecutionId { get; }
+        internal Action<AsyncTaskCompletedEventArgs, IBuffer, IBuffer, IExecutionContext> Action { get; }
 
         public AwaitTaskDescriptor()
         { }

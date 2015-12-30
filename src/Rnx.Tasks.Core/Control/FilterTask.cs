@@ -10,7 +10,7 @@ namespace Rnx.Tasks.Core.Control
 {
     public class FilterTaskDescriptor : TaskDescriptorBase<FilterTask>
     {
-        public Func<IBufferElement, bool> Predicate { get; }
+        internal Func<IBufferElement, bool> Predicate { get; }
 
         public FilterTaskDescriptor(Func<IBufferElement, bool> predicate)
         {

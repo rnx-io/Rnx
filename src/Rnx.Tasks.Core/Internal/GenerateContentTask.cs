@@ -10,8 +10,8 @@ namespace Rnx.Tasks.Core.Internal
 {
     public class GenerateContentTaskDescriptor : TaskDescriptorBase<GenerateContentTask>
     {
-        public int NumberOfElements { get; }
-        public Func<int, string> TextGenerator { get; }
+        internal int NumberOfElements { get; }
+        internal Func<int, string> TextGenerator { get; }
 
         public GenerateContentTaskDescriptor(int numberOfElements, Func<int, string> textGenerator = null)
         {

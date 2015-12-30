@@ -10,7 +10,7 @@ namespace Rnx.Tasks.Core.Content
 {
     public class AppendTextTaskDescriptor : TaskDescriptorBase<AppendTextTask>
     {
-        public string TextToAppend { get; }
+        internal string TextToAppend { get; }
 
         public AppendTextTaskDescriptor(string textToAppend)
         {

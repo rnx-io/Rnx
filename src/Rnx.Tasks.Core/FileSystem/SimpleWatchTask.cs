@@ -10,13 +10,13 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class SimpleWatchTaskDescriptor : TaskDescriptorBase<SimpleWatchTask>
     {
-        public string DirectoryPath { get; }
-        public string SimpleFilter { get; }
-        public Predicate<FileSystemEventArgs> AdvancedFilter { get; private set; }
-        public ITaskDescriptor TaskDescriptorToRun { get; }
-        public bool IncludeSubdirectories { get; }
-        public WatcherChangeTypes ChangeType { get; private set; } = WatcherChangeTypes.All;
-        public Action<FileSystemEventArgs> OnChangeAction { get; private set; }
+        internal string DirectoryPath { get; }
+        internal string SimpleFilter { get; }
+        internal Predicate<FileSystemEventArgs> AdvancedFilter { get; private set; }
+        internal ITaskDescriptor TaskDescriptorToRun { get; }
+        internal bool IncludeSubdirectories { get; }
+        internal WatcherChangeTypes ChangeType { get; private set; } = WatcherChangeTypes.All;
+        internal Action<FileSystemEventArgs> OnChangeAction { get; private set; }
 
         public string ExecutionId { get; private set; }
 

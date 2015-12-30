@@ -55,13 +55,11 @@ namespace Rnx.TaskLoader.Compilation
                 }
             }
 
-            IEnumerable<string> preprocessorSymbols = _applicationEnvironment.Configuration.ToLower().Contains("debug") ? new string[] { "DEBUG" }
-                                                                                                                        : Enumerable.Empty<string>();
             CSharpCompilation compilation = CSharpCompilation.Create(
                 assemblyName: Guid.NewGuid().ToString(),
-                syntaxTrees: BuildSyntaxTrees(sourceCodes, new CSharpParseOptions(preprocessorSymbols: preprocessorSymbols)),
+                syntaxTrees: BuildSyntaxTrees(sourceCodes),
                 references: _metaDataReferenceProvider.GetCurrentMetaDataReferences(),
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Debug, warningLevel: 0));
+                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release, warningLevel: 0));
 
             Assembly compiledAssembly = null;
 
@@ -79,9 +77,9 @@ namespace Rnx.TaskLoader.Compilation
             return compiledAssembly;
         }
 
-        private IEnumerable<SyntaxTree> BuildSyntaxTrees(string[] sourceCodes, CSharpParseOptions parseOptions)
+        private IEnumerable<SyntaxTree> BuildSyntaxTrees(string[] sourceCodes)
         {
-            return sourceCodes.Select(f => CSharpSyntaxTree.ParseText(f, parseOptions));
+            return sourceCodes.Select(f => CSharpSyntaxTree.ParseText(f));
         }
 
         // gets the temporary path to cache compiled assemblies

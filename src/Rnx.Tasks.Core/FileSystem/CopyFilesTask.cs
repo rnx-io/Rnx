@@ -8,8 +8,8 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class CopyFilesTaskDescriptor : TaskDescriptorBase<CopyFilesTask>
     {
-        public ReadFilesTaskDescriptor ReadFilesTaskDescriptor { get; }
-        public WriteFilesTaskDescriptor WriteFilesTaskDescriptor { get; }
+        internal ReadFilesTaskDescriptor ReadFilesTaskDescriptor { get; }
+        internal WriteFilesTaskDescriptor WriteFilesTaskDescriptor { get; }
 
         public CopyFilesTaskDescriptor(string sourceGlobPattern, string destination)
         {

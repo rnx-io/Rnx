@@ -8,8 +8,6 @@ using System.Linq;
 using System.IO;
 using Rnx.Tasks.Core.FileSystem;
 using Rnx.Tasks.Core.Control;
-//using Rnx.Tasks.Core.Threading;
-//using static Rnx.Tasks.Core.Tasks;
 using Rnx.Tasks.Core.Compression;
 using Rnx.Abstractions.Util;
 using Rnx.Tasks.Core.Net;
@@ -43,6 +41,7 @@ namespace Rnx
                 new WriteFilesTaskDescriptor("tmp")
             );
 
+        //public ITaskDescriptor LogTest => new Tasks.DebugTest.BlaTaskDescriptor();
         public ITaskDescriptor LogTest => new LogTaskDescriptor("Hello World!");
 
         //public ITask ZipTest => Series(

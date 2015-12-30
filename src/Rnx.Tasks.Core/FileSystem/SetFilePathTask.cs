@@ -10,8 +10,8 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class SetFilePathTaskDescriptor : TaskDescriptorBase<SetFilePathTask>
     {
-        public Func<IBufferElement, string> ElementFilePath { get; }
-        public Func<IBufferElement, bool> WhereCondition { get; private set; } = e => true;
+        internal Func<IBufferElement, string> ElementFilePath { get; }
+        internal Func<IBufferElement, bool> WhereCondition { get; private set; } = e => true;
 
         public SetFilePathTaskDescriptor(Func<IBufferElement, string> elementFilePath)
         {

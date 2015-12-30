@@ -14,10 +14,10 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class ReadFilesTaskDescriptor : TaskDescriptorBase<ReadFilesTask>
     {
-        public string[] GlobPatterns { get; }
-        public Func<string, bool> Condition { get; private set; }
-        public string BaseDirectory { get; private set; }
-        public bool OnlyChangedFilesSinceLastRun { get; private set; }
+        internal string[] GlobPatterns { get; }
+        internal Func<string, bool> Condition { get; private set; }
+        internal string BaseDirectory { get; private set; }
+        internal bool OnlyChangedFilesSinceLastRun { get; private set; }
 
         public ReadFilesTaskDescriptor(params string[] globPatterns)
         {

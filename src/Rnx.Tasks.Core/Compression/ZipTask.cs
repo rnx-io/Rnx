@@ -11,7 +11,7 @@ namespace Rnx.Tasks.Core.Compression
 {
     public class ZipTaskDescriptor : TaskDescriptorBase<ZipTask>
     {
-        public string ZipEntryFilePath { get; private set; }
+        internal string ZipEntryFilePath { get; private set; }
 
         public ZipTaskDescriptor(string zipEntryFilePath)
         {

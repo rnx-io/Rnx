@@ -12,7 +12,7 @@ namespace Rnx.Tasks.Core.Control
 
     public class OrderByTaskDescriptor : TaskDescriptorBase<OrderByTask>
     {
-        public OrderByCondition OrderByCondition { get; }
+        internal OrderByCondition OrderByCondition { get; }
 
         public OrderByTaskDescriptor(OrderByCondition orderByCondition)
         {

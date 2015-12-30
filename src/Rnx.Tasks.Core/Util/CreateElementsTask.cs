@@ -10,7 +10,7 @@ namespace Rnx.Tasks.Core.Util
 {
     public class CreateElementsTaskDescriptor : TaskDescriptorBase<CreateElementsTask>
     {
-        public string[] ElementTexts { get; }
+        internal string[] ElementTexts { get; }
 
         public CreateElementsTaskDescriptor(params string[] elementTexts)
         {

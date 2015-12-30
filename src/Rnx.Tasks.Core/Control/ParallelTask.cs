@@ -10,7 +10,7 @@ namespace Rnx.Tasks.Core.Control
 {
     public class ParallelTaskDescriptor : MultiTaskDescriptor<ParallelTask>
     {
-        public ParallelTaskOutputStrategy OutputStrategy { get; }
+        internal ParallelTaskOutputStrategy OutputStrategy { get; }
 
         public ParallelTaskDescriptor(ParallelTaskOutputStrategy outputStrategy, params ITaskDescriptor[] taskDescriptors)
             : base(taskDescriptors)

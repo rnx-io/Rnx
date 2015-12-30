@@ -11,7 +11,7 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class RenameTaskDescriptor : TaskDescriptorBase<RenameTask>
     {
-        public Action<IBufferElement, WriteFileData> Action { get; }
+        internal Action<IBufferElement, WriteFileData> Action { get; }
 
         public RenameTaskDescriptor(Action<WriteFileData> action)
             : this(new Action<IBufferElement, WriteFileData>((e,f) => action(f)))

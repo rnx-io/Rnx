@@ -11,9 +11,9 @@ namespace Rnx.Tasks.Core.Control
 {
     public class BlockWiseTaskDescriptor : TaskDescriptorBase<BlockWiseTask>
     {
-        public int BlockSize { get; }
-        public bool AllowParallelExecutionOfBlocks { get; private set; }
-        public Func<BlockWiseData,ITaskDescriptor> TaskDescriptorToRun { get; }
+        internal int BlockSize { get; }
+        internal bool AllowParallelExecutionOfBlocks { get; private set; }
+        internal Func<BlockWiseData,ITaskDescriptor> TaskDescriptorToRun { get; }
 
         public BlockWiseTaskDescriptor(int blockSize, Func<BlockWiseData, ITaskDescriptor> taskDescriptorToRun, bool requiresDetailedBlockInfo = false)
         {

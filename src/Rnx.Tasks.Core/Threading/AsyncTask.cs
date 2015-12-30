@@ -8,8 +8,8 @@ namespace Rnx.Tasks.Core.Threading
 {
     public class AsyncTaskDescriptor : TaskDescriptorBase<AsyncTask>
     {
-        public ITaskDescriptor TaskDescriptorToRunAsynchronously { get; }
-        public string ExecutionId { get; }
+        internal ITaskDescriptor TaskDescriptorToRunAsynchronously { get; }
+        internal string ExecutionId { get; }
 
         public AsyncTaskDescriptor(ITaskDescriptor taskDescriptorToRunAsynchronously, string executionId = null)
         {

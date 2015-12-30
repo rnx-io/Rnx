@@ -12,9 +12,9 @@ namespace Rnx.Tasks.Core.FileSystem
 {
     public class DeleteTaskDescriptor : TaskDescriptorBase<DeleteTask>
     {
-        public string[] GlobPatterns { get; }
-        public bool ShouldKeepEmptyDirectories { get; private set; }
-        public Func<string, bool> Condition { get; private set; }
+        internal string[] GlobPatterns { get; }
+        internal bool ShouldKeepEmptyDirectories { get; private set; }
+        internal Func<string, bool> Condition { get; private set; }
 
         public DeleteTaskDescriptor(params string[] globPatterns)
         {
