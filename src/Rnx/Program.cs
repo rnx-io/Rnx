@@ -28,11 +28,11 @@ namespace Rnx
             var silentOption =              rnxApp.Option("-s|--silent", "Disables logging to the console", CommandOptionType.NoValue);
             var versionOption =             rnxApp.Option("-v|--version", "Displays the current version", CommandOptionType.NoValue);
             var helpOption =                rnxApp.Option("-h|--help", "Displays the help", CommandOptionType.NoValue);
+            var commandLineSettings = new CommandLineSettings();
 
             rnxApp.OnExecute(() =>
             {
                 string currentDirectory = Directory.GetCurrentDirectory();
-                var commandLineSettings = new CommandLineSettings();
                 commandLineSettings.BaseDirectory = currentDirectory;
 
                 if (baseDirectoryOption.HasValue())
@@ -56,21 +56,7 @@ namespace Rnx
 
                 if (printTasksOption.HasValue())
                 {
-                    var taskNameResolver = new TaskNameResolver(new DefaultGlobMatcher(), new DefaultFileSystem());
-                    var foundTaskNames = taskNameResolver.FindAvailableTaskNames(commandLineSettings.BaseDirectory, commandLineSettings.TaskSourceCodeGlobPaths).ToArray();
-
-                    if(foundTaskNames.Any())
-                    {
-                        foreach(var taskName in foundTaskNames)
-                        {
-                            Console.WriteLine(taskName);
-                        }
-                    }
-                    else
-                    {
-                        Console.Error.WriteLine("No tasks found");
-                    }
-
+                    PrintAvailableTasks(commandLineSettings);
                     return 0;
                 }
 
@@ -135,6 +121,14 @@ namespace Rnx
                 }
 
                 entryLogger.LogCritical($"Task execution error: {errorMessage}");
+
+                if( ex is InvalidTaskNameException)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("The following tasks are available:");
+                    PrintAvailableTasks(commandLineSettings, true);
+                    return 5;
+                }
                 
                 return 1;
             }
@@ -159,6 +153,29 @@ namespace Rnx
             int min = (int)LogLevel.Debug;
             int max = (int)LogLevel.Critical;
             return result < min ? min : (result > max ? max : result);
+        }
+
+        private static void PrintAvailableTasks(CommandLineSettings commandLineSettings, bool prependDash = false)
+        {
+            var taskNameResolver = new TaskNameResolver(new DefaultGlobMatcher(), new DefaultFileSystem());
+            var foundTaskNames = taskNameResolver.FindAvailableTaskNames(commandLineSettings.BaseDirectory, commandLineSettings.TaskSourceCodeGlobPaths).ToArray();
+
+            if (foundTaskNames.Any())
+            {
+                foreach (var taskName in foundTaskNames)
+                {
+                    if(prependDash)
+                    {
+                        Console.Write("- ");
+                    }
+
+                    Console.WriteLine(taskName);
+                }
+            }
+            else
+            {
+                Console.Error.WriteLine("No tasks found");
+            }
         }
     }
 }

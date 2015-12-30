@@ -1,23 +1,26 @@
-﻿using Rnx.Abstractions.Tasks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 using Rnx.Abstractions.Buffers;
 using Rnx.Abstractions.Execution;
+using Rnx.Abstractions.Tasks;
 using Rnx.Abstractions.Util;
-using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 
 namespace Rnx.Tasks.Core.Util
 {
     public class LogTaskDescriptor : TaskDescriptorBase<LogTask>
     {
-        internal string Message { get; }
+        internal Func<IBufferElement[], string> Message { get; }
         internal LogType LogType { get; private set; } = LogType.Info;
 
         public LogTaskDescriptor(string message)
+            : this(e => message)
+        { }
+
+        public LogTaskDescriptor(Func<IBufferElement[], string> message)
         {
             Message = message;
+            RequiresCompletedInputBuffer = true;
         }
 
         public LogTaskDescriptor AsWarning()
@@ -45,20 +48,26 @@ namespace Rnx.Tasks.Core.Util
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
             var logger = LoggingContext.Current.LoggerFactory.CreateLogger(nameof(LogTask));
+            Action<string> logAction = null;
 
             switch (_taskDescriptor.LogType)
             {
                 case LogType.Info:
-                    logger.LogInformation(_taskDescriptor.Message);
+                    logAction = logger.LogInformation;
                     break;
                 case LogType.Warning:
-                    logger.LogWarning(_taskDescriptor.Message);
+                    logAction = logger.LogWarning;
                     break;
                 case LogType.Error:
-                    logger.LogError(_taskDescriptor.Message);
+                    logAction = logger.LogError;
                     break;
-                default:
-                    break;
+            }
+
+            var allElements = input.Elements.ToArray();
+
+            if (_taskDescriptor.Message != null)
+            {
+                logAction(_taskDescriptor.Message(allElements));
             }
         }
     }

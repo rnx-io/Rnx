@@ -15,6 +15,12 @@ namespace Rnx.Abstractions.Buffers
         IDataStore Data { get; }
 
         /// <summary>
+        /// Shortcut to retrieve data entries from the <see cref="IDataStore"/>
+        /// </summary>
+        /// <typeparam name="TData">The type of data</typeparam>
+        TData Get<TData>();
+
+        /// <summary>
         /// Represents the underlying Stream for this element, e.g. a FileStream for a file-based element.
         /// This property is mostly called for binary transformations (e.g. compression) or for copying data
         /// from one stream to another.

@@ -26,6 +26,11 @@ namespace Rnx.Core.Buffers
             _streamFactory = () => Stream.Null;
         }
 
+        public TData Get<TData>()
+        {
+            return Data.Get<TData>();
+        }
+
         public Stream Stream
         {
             get { return _streamFactory(); }

@@ -1,5 +1,5 @@
 {
-    "version": "0.4.0-beta",
+    "version": "0.4.3-beta",
     "description": "Rnx.Core Class Library",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
@@ -34,6 +34,6 @@
         "Microsoft.Dnx.Compilation.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
-        "Rnx.Abstractions": "0.4.0-beta"
+        "Rnx.Abstractions": "0.4.2-beta"
     }
 }

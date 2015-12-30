@@ -37,7 +37,8 @@ namespace Rnx.Tasks.Core
         public static ParallelTaskDescriptor ConcatElements(params ITaskDescriptor[] taskDescriptors)
                                                 => new ParallelTaskDescriptor(ParallelTaskOutputStrategy.ConcatToInput, taskDescriptors);
         public static FilterTaskDescriptor Filter(Func<IBufferElement,bool> predicate) => new FilterTaskDescriptor(predicate);
-        public static IfTaskDescriptor If(Func<IBufferElement,bool> predicate, ITaskDescriptor taskDescriptor) => new IfTaskDescriptor(predicate, taskDescriptor);
+
+        public static IfElementTaskDescriptor IfElement(Func<IBufferElement,bool> predicate, ITaskDescriptor taskDescriptor) => new IfElementTaskDescriptor(predicate, taskDescriptor);
         public static SwitchTaskDescriptor Switch(Func<IBufferElement, object> valueSelector) => new SwitchTaskDescriptor(valueSelector);
         public static OrderByTaskDescriptor OrderBy(OrderByCondition orderByCondition) => new OrderByTaskDescriptor(orderByCondition);
         public static BlockWiseTaskDescriptor BlockWise(int blockSize, Func<BlockWiseData, ITaskDescriptor> taskDescriptorToRun, bool requiresDetailedBlockInfo = false) 
@@ -51,7 +52,7 @@ namespace Rnx.Tasks.Core
         public static ReadFilesTaskDescriptor ReadFiles(params string[] globPatterns) => new ReadFilesTaskDescriptor(globPatterns);
         public static RenameTaskDescriptor Rename(Action<WriteFileData> action) => new RenameTaskDescriptor(action);
         public static RenameTaskDescriptor Rename(Action<IBufferElement, WriteFileData> action) => new RenameTaskDescriptor(action);
-        public static WriteFilesTaskDescriptor WriteFiles(string destinationDirectory) => new WriteFilesTaskDescriptor(destinationDirectory);
+        public static WriteFilesTaskDescriptor WriteFiles(string destinationDirectory = "") => new WriteFilesTaskDescriptor(destinationDirectory);
         public static SimpleWatchTaskDescriptor SimpleWatch(string directoryPath, ITaskDescriptor taskDescriptorToRun, string simpleFilter = "*.*", bool includeSubdirectories = true)
                                 => new SimpleWatchTaskDescriptor(directoryPath, taskDescriptorToRun, simpleFilter, includeSubdirectories);
 
@@ -67,6 +68,10 @@ namespace Rnx.Tasks.Core
         public static LogTaskDescriptor Log(string message) => new LogTaskDescriptor(message);
         public static LogTaskDescriptor LogWarning(string message) => new LogTaskDescriptor(message).AsWarning();
         public static LogTaskDescriptor LogError(string message) => new LogTaskDescriptor(message).AsError();
+        public static LogTaskDescriptor Log(Func<IBufferElement[], string> message) => new LogTaskDescriptor(message);
+        public static LogTaskDescriptor LogWarning(Func<IBufferElement[], string> message) => new LogTaskDescriptor(message).AsWarning();
+        public static LogTaskDescriptor LogError(Func<IBufferElement[], string> message) => new LogTaskDescriptor(message).AsError();
+        public static LogElementTaskDescriptor LogElement(Func<IBufferElement, string> message) => new LogElementTaskDescriptor(message);
 
         // Threading
         public static AsyncTaskDescriptor Async(ITaskDescriptor taskDescriptorToRunAsynchronously, string executionId = null)

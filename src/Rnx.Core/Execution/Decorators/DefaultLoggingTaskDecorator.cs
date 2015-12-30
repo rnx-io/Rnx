@@ -23,14 +23,14 @@ namespace Rnx.Core.Execution.Decorators
             var taskName = task.Name;
             var logger = LoggingContext.Current.LoggerFactory.CreateLogger(taskName);
             
-            logger.LogInformation("Starting task {0}...", taskName);
+            logger.LogVerbose("Starting task {0}...", taskName);
 
             var stopwatch = Stopwatch.StartNew();
 
             decoratorQueue.GetNext()?.Execute(decoratorQueue, task, input, output, executionContext);
 
             stopwatch.Stop();
-            logger.LogInformation("Task {0} completed in {1} ms", taskName, stopwatch.ElapsedMilliseconds);
+            logger.LogVerbose("Task {0} completed in {1} ms", taskName, stopwatch.ElapsedMilliseconds);
         }
     }
 }

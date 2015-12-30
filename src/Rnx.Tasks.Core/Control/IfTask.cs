@@ -4,24 +4,26 @@ using Rnx.Abstractions.Tasks;
 using Rnx.Tasks.Core.Internal;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Rnx.Tasks.Core.Control
 {
     public class IfTaskDescriptor : TaskDescriptorBase<IfTask>
     {
-        internal List<PredicateTaskDescriptorPair> PredicateTaskPairs { get; } = new List<PredicateTaskDescriptorPair>();
+        internal List<AllElementsPredicateTaskDescriptorPair> PredicateTaskPairs { get; } = new List<AllElementsPredicateTaskDescriptorPair>();
         private bool _elseCalled;
 
-        public IfTaskDescriptor(Func<IBufferElement,bool> predicate, ITaskDescriptor taskDescriptorToRun)
+        public IfTaskDescriptor(Func<IBufferElement[], bool> predicate, ITaskDescriptor taskDescriptorToRun)
         {
-            PredicateTaskPairs.Add(new PredicateTaskDescriptorPair(predicate, taskDescriptorToRun));
+            PredicateTaskPairs.Add(new AllElementsPredicateTaskDescriptorPair(predicate, taskDescriptorToRun));
+            RequiresCompletedInputBuffer = true;
         }
 
-        public IfTaskDescriptor ElseIf(Func<IBufferElement, bool> predicate, ITaskDescriptor taskDescriptorToRun)
+        public IfTaskDescriptor ElseIf(Func<IBufferElement[], bool> predicate, ITaskDescriptor taskDescriptorToRun)
         {
             CheckElseCalled();
 
-            PredicateTaskPairs.Add(new PredicateTaskDescriptorPair(predicate, taskDescriptorToRun));
+            PredicateTaskPairs.Add(new AllElementsPredicateTaskDescriptorPair(predicate, taskDescriptorToRun));
             return this;
         }
 
@@ -29,7 +31,7 @@ namespace Rnx.Tasks.Core.Control
         {
             CheckElseCalled();
 
-            PredicateTaskPairs.Add(new PredicateTaskDescriptorPair(t => true, taskDescriptorToRun));
+            PredicateTaskPairs.Add(new AllElementsPredicateTaskDescriptorPair(t => true, taskDescriptorToRun));
             _elseCalled = true;
             return this;
         }
@@ -45,21 +47,26 @@ namespace Rnx.Tasks.Core.Control
 
     public class IfTask : ControlTask
     {
-        private readonly IfTaskDescriptor _ifTaskDescriptor;
+        private readonly IfTaskDescriptor _taskDescriptor;
         private readonly ITaskExecuter _taskExecuter;
-        private readonly IBufferFactory _bufferFactory;
 
-        public IfTask(IfTaskDescriptor ifTaskDescriptor, ITaskExecuter taskExecuter, IBufferFactory bufferFactory)
+        public IfTask(IfTaskDescriptor taskDescriptor, ITaskExecuter taskExecuter)
         {
-            _ifTaskDescriptor = ifTaskDescriptor;
+            _taskDescriptor = taskDescriptor;
             _taskExecuter = taskExecuter;
-            _bufferFactory = bufferFactory;
         }
-        
+
         public override void Execute(IBuffer input, IBuffer output, IExecutionContext executionContext)
         {
-            var taskPairExecuter = new PredicateTaskDescriptorPairExecuter(_ifTaskDescriptor.PredicateTaskPairs, _taskExecuter, _bufferFactory);
-            taskPairExecuter.Execute(input, output, executionContext);
+            var allElements = input.Elements.ToArray();
+
+            foreach(var predicateTaskPair in _taskDescriptor.PredicateTaskPairs)
+            {
+                if(predicateTaskPair.Predicate(allElements))
+                {
+                    _taskExecuter.Execute(predicateTaskPair.TaskDescriptor, input, output, executionContext);
+                }
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Rnx.Tasks.Core.FileSystem
     {
         internal string DestinationDirectory;
 
-        public WriteFilesTaskDescriptor(string destinationDirectory)
+        public WriteFilesTaskDescriptor(string destinationDirectory = "")
         {
             DestinationDirectory = destinationDirectory;
         }

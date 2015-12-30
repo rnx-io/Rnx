@@ -59,7 +59,7 @@ namespace Rnx
             if (tasksToRun.Length != _commandLineSettings.TasksToRun.Length)
             {
                 var invalidTaskNames = _commandLineSettings.TasksToRun.Except(tasksToRun.Select(f => f.UserDefinedTaskName), StringComparer.OrdinalIgnoreCase).ToArray();
-                throw new RnxException($"Invalid task name(s): {string.Join(", ", invalidTaskNames)}");
+                throw new InvalidTaskNameException($"Invalid task name(s): {string.Join(", ", invalidTaskNames)}");
             }
 
             if (!tasksToRun.Any())

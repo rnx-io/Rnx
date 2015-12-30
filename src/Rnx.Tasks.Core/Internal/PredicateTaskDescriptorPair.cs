@@ -18,4 +18,16 @@ namespace Rnx.Tasks.Core.Internal
             TaskDescriptor = taskDescriptor;
         }
     }
+
+    internal class AllElementsPredicateTaskDescriptorPair
+    {
+        public Func<IBufferElement[], bool> Predicate { get; }
+        public ITaskDescriptor TaskDescriptor { get; }
+
+        public AllElementsPredicateTaskDescriptorPair(Func<IBufferElement[], bool> predicate, ITaskDescriptor taskDescriptor)
+        {
+            Predicate = predicate;
+            TaskDescriptor = taskDescriptor;
+        }
+    }
 }

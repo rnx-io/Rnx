@@ -1,5 +1,5 @@
 {
-    "version": "0.4.5-beta",
+    "version": "0.4.7-beta",
     "description": "Rnx.Tasks.Core Class Library",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "" ],
@@ -29,7 +29,7 @@
     },
     "dependencies": {
         "Reliak.IO.Abstractions": "0.1.0",
-        "Rnx.Abstractions": "0.4.0-beta",
+        "Rnx.Abstractions": "0.4.1-beta",
         "Rnx.Util": "0.4.0-beta",
         "System.IO.Compression.ZipFile": "4.0.1-beta-23516",
         "System.Runtime": "4.0.21-beta-23516",

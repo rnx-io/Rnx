@@ -17,17 +17,6 @@ namespace Rnx
 {
     public class ExampleConfig
     {
-        public ITaskDescriptor PrintConsole => new SeriesTaskDescriptor(
-            //Async(new AsyncCompleteTestTask(), "asynctest"),
-            //Parallel(new AsyncCompleteTestTask(), new AsyncCompleteTestTask()),
-            new MyTaskDescriptor(),
-            new IfTaskDescriptor(f => int.Parse(f.Text) % 2 == 0, new MySpecialTaskDescriptor()),
-            new MyPrinterTaskDescriptor()
-            //new MyModifierTask()//,
-            //CopyFiles("*.json", "tmp/output")
-            //Await("asynctest", (e, i, o, c) => { Console.WriteLine("Await task says: " + e.AsyncTask.Name + " completed. Element: " + e.OutputBuffer.Elements.First().Text); })
-        );
-
         public ITaskDescriptor RunProcess => new StartProcessTaskDescriptor(@"C:\Users\dan\Documents\visual studio 2015\Projects\ConsoleApplication11\ConsoleApplication11\bin\Debug\ConsoleApplication11.exe", "Daniel");
 
         public ITaskDescriptor Download => new SeriesTaskDescriptor(new HttpGetTaskDescriptor("https://github.com/rnx-io/Rnx/archive/master.zip", "blub.zip"),
@@ -119,6 +108,11 @@ namespace Rnx
             public IBufferElement Clone()
             {
                 return null;
+            }
+
+            public TData Get<TData>()
+            {
+                throw new NotImplementedException();
             }
         }
     }

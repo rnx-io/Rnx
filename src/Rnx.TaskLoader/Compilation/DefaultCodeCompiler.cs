@@ -56,15 +56,31 @@ namespace Rnx.TaskLoader.Compilation
                 references: _metaDataReferenceProvider.GetCurrentMetaDataReferences(),
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release, warningLevel: 0));
 
-            using (var ms = _fileSystem.File.Open(tempAssembly, FileMode.CreateNew, FileAccess.ReadWrite))
+            try
             {
-                var compilationResult = compilation.Emit(ms);
+                using (var ms = _fileSystem.File.Open(tempAssembly, FileMode.CreateNew, FileAccess.ReadWrite))
+                {
+                    var compilationResult = compilation.Emit(ms);
 
-                if (!compilationResult.Success)
-                    throw new CodeCompilationException(string.Join(Environment.NewLine, compilationResult.Diagnostics.Select(f => f.GetMessage()).ToArray()));
+                    if (!compilationResult.Success)
+                    {
+                        throw new CodeCompilationException(string.Join(Environment.NewLine, compilationResult.Diagnostics.Select(f => f.GetMessage()).ToArray()));
+                    }
 
-                ms.Seek(0, SeekOrigin.Begin);
-                return _assemblyLoadContextAccessor.Default.LoadStream(ms, null);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    return _assemblyLoadContextAccessor.Default.LoadStream(ms, null);
+                }
+            }
+            catch(Exception ex)
+            {
+                try
+                {
+                    // delete the non-successful build
+                    _fileSystem.File.Delete(tempAssembly);
+                }
+                catch { }
+
+                throw ex;
             }
         }
 
