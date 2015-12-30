@@ -1,5 +1,5 @@
 {
-    "version": "0.5.0-beta",
+    "version": "0.5.2-beta",
     "description": "Rnx Console Application",
     "authors": [ "Daniel Kailer" ],
     "tags": [ "rnx", "task", "runner", "build", "tool", "cross plattform" ],
@@ -9,14 +9,14 @@
     "dependencies": {
         "Rnx.Abstractions": "0.2.4-beta",
         "Rnx.Core": "0.4.0-beta",
-        "Rnx.Tasks.Core": "0.4.4-beta",
+        "Rnx.Tasks.Core": "0.4.5-beta",
         "Microsoft.Extensions.DependencyInjection": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Abstractions": "1.0.0-rc1-final",
         "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
         "Microsoft.Extensions.PlatformAbstractions": "1.0.0-rc1-final",
         "Rnx.Util": "1.0.0-*",
-        "Rnx.TaskLoader": "0.4.0-beta",
+        "Rnx.TaskLoader": "0.4.4-beta",
         "Microsoft.Framework.CommandLineUtils.Sources": "1.0.0-beta5"
     },
 

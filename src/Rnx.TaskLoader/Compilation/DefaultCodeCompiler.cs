@@ -41,18 +41,13 @@ namespace Rnx.TaskLoader.Compilation
             if (_fileSystem.File.Exists(tempAssembly))
             {
                 // use cached assembly
-                using (var fs = _fileSystem.File.OpenRead(tempAssembly))
-                {
-                    return _assemblyLoadContextAccessor.Default.LoadStream(fs, null);
-                }
+                return _assemblyLoadContextAccessor.Default.LoadFile(tempAssembly);
             }
-            else
+            
+            // clear all previously compiled, temporary assemblies
+            foreach (var filename in _fileSystem.Directory.GetFiles(tempPath))
             {
-                // clear all previously compiled, temporary assemblies
-                foreach(var filename in _fileSystem.Directory.GetFiles(tempPath))
-                {
-                    _fileSystem.File.Delete(filename);
-                }
+                _fileSystem.File.Delete(filename);
             }
 
             CSharpCompilation compilation = CSharpCompilation.Create(
@@ -61,9 +56,7 @@ namespace Rnx.TaskLoader.Compilation
                 references: _metaDataReferenceProvider.GetCurrentMetaDataReferences(),
                 options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary, optimizationLevel: OptimizationLevel.Release, warningLevel: 0));
 
-            Assembly compiledAssembly = null;
-
-            using(var ms = _fileSystem.File.Open(tempAssembly, FileMode.CreateNew, FileAccess.ReadWrite))
+            using (var ms = _fileSystem.File.Open(tempAssembly, FileMode.CreateNew, FileAccess.ReadWrite))
             {
                 var compilationResult = compilation.Emit(ms);
 
@@ -71,10 +64,8 @@ namespace Rnx.TaskLoader.Compilation
                     throw new CodeCompilationException(string.Join(Environment.NewLine, compilationResult.Diagnostics.Select(f => f.GetMessage()).ToArray()));
 
                 ms.Seek(0, SeekOrigin.Begin);
-                compiledAssembly = _assemblyLoadContextAccessor.Default.LoadStream(ms, null);
+                return _assemblyLoadContextAccessor.Default.LoadStream(ms, null);
             }
-            
-            return compiledAssembly;
         }
 
         private IEnumerable<SyntaxTree> BuildSyntaxTrees(string[] sourceCodes)

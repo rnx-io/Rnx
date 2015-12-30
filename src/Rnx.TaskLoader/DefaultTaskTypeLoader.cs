@@ -4,6 +4,7 @@ using Rnx.TaskLoader.Compilation;
 using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -26,11 +27,11 @@ namespace Rnx.TaskLoader
         {
             var sourceCodeFilenames = DetermineSourceCodeFilenames(baseDirectory, searchPatterns).ToArray();
 
-            if(!sourceCodeFilenames.Any())
+            if (!sourceCodeFilenames.Any())
             {
                 throw new RnxException($"No source code files were found for '{string.Join(", ", searchPatterns)}'");
             }
-
+            
             var sourceCodes = sourceCodeFilenames.Select(f => _fileSystem.File.ReadAllText(f)).ToArray();
             var compiledAssembly = _codeCompiler.Compile(sourceCodes);
             var taskConfigurationTypes = compiledAssembly.ExportedTypes.Where(f => f.GetTypeInfo().IsPublic && f.GetTypeInfo().IsClass);
@@ -45,6 +46,12 @@ namespace Rnx.TaskLoader
 
         private IEnumerable<string> DetermineSourceCodeFilenames(string baseDirectory, params string[] searchPatterns)
         {
+            // faster version, if no glob pattern is contained in the strings
+            if(searchPatterns.All(f => !f.Contains('*') && !f.Contains('?') && f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
+            {
+                return searchPatterns.Select(f => Path.GetFullPath(Path.Combine(baseDirectory, f)));
+            }
+
             return _globMatcher.FindMatches(baseDirectory, searchPatterns).Select(f => f.FullPath);
         }
     }

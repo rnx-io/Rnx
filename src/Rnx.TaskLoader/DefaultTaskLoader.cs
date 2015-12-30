@@ -34,10 +34,7 @@ namespace Rnx.TaskLoader
 
                 foreach (var t in e.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                         .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.PropertyType) && checkName(f))
-                                        .Select(f => {
-                                            var taskDescriptor = (ITaskDescriptor)f.GetGetMethod().Invoke(e.Instance, null);
-                                            return new UserDefinedTaskDescriptor(f.Name, taskDescriptor);
-                                            })
+                                        .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.GetGetMethod().Invoke(e.Instance, null)))
                                         )
                 {
                     yield return t;
