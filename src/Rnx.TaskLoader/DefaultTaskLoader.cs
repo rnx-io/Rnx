@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Rnx.TaskLoader
 {
@@ -23,16 +25,17 @@ namespace Rnx.TaskLoader
 
             foreach (var e in taskConfigurationTypes.Select(f => new { Type = f, Instance = ActivatorUtilities.CreateInstance(_serviceProvider, f) }))
             {
-                foreach (var t in e.Type.GetTypeInfo().DeclaredMethods
-                                        .Where(f => f.IsPublic && typeof(ITaskDescriptor).IsAssignableFrom(f.ReturnType) && checkName(f))
+                foreach (var t in e.Type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.ReturnType) && checkName(f))
                                         .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.Invoke(e.Instance, null))))
                 {
                     yield return t;
                 }
-
-                foreach (var t in e.Type.GetTypeInfo().DeclaredProperties
-                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.PropertyType) && f.GetMethod.IsPublic && checkName(f))
-                                        .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.GetGetMethod().Invoke(e.Instance, null))))
+                
+                foreach (var t in e.Type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                        .Where(f => typeof(ITaskDescriptor).IsAssignableFrom(f.PropertyType) && checkName(f))
+                                        .Select(f => new UserDefinedTaskDescriptor(f.Name, (ITaskDescriptor)f.GetGetMethod().Invoke(e.Instance, null)))
+                                        )
                 {
                     yield return t;
                 }
