@@ -40,8 +40,13 @@ namespace Rnx.TaskLoader.Compilation
             // check whether the exact source code was previously compiled
             if (_fileSystem.File.Exists(tempAssembly))
             {
-                // use cached assembly
-                return _assemblyLoadContextAccessor.Default.LoadFile(tempAssembly);
+                try
+                {
+                    // use cached assembly
+                    return _assemblyLoadContextAccessor.Default.LoadFile(tempAssembly);
+                }
+                catch // if loading somehow fails, ignore exception and compile source code
+                { }
             }
             
             // clear all previously compiled, temporary assemblies

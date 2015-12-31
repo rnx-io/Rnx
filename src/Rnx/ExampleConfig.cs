@@ -33,6 +33,8 @@ namespace Rnx
         //public ITaskDescriptor LogTest => new Tasks.DebugTest.BlaTaskDescriptor();
         public ITaskDescriptor LogTest => new LogTaskDescriptor("Hello World!");
 
+        public ITaskDescriptor RunTests => new StartProcessTaskDescriptor("dnx", "-p ../../test/Rnx.Tasks.Core.Tests test");
+
         //public ITask ZipTest => Series(
         //    ReadFiles("*.cs"),
         //    Zip("test.zip"),

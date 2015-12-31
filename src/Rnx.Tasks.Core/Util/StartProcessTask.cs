@@ -45,7 +45,7 @@ namespace Rnx.Tasks.Core.Util
             var process = new System.Diagnostics.Process();
             process.StartInfo = _taskDescriptor.ProcessStartInfo;
 
-            if(_taskDescriptor.ProcessStartInfo.RedirectStandardOutput)
+            if (_taskDescriptor.ProcessStartInfo.RedirectStandardOutput)
             {
                 process.OutputDataReceived += (s, e) => { if (e.Data != null) { logger.LogVerbose(e.Data); } };
             }

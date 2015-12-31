@@ -21,7 +21,7 @@ namespace Rnx
         {
             var rnxApp = new CommandLineApplication { Name = "Rnx", Description = "A cross-platform C# task runner", FullName = "Rnx" };
             var taskArgument =            rnxApp.Argument("[task1 task2]", $"The name of the task(s) that should be executed. If no task is specified, Rnx looks for a '{DEFAULT_TASK_NAME}'-task", true);
-            var printTasksOption =          rnxApp.Option("--tasks", "Prints all available tasks", CommandOptionType.NoValue);
+            var printTasksOption =          rnxApp.Option("-t|--tasks", "Prints all available tasks", CommandOptionType.NoValue);
             var rnxFileOption =             rnxApp.Option("-f|--rnxfile <FILENAME>", $"Filename or glob pattern for the rnx file(s) to look for tasks. The default is '{DEFAULT_RNX_FILENAME}'.", CommandOptionType.MultipleValue);
             var baseDirectoryOption =       rnxApp.Option("-b|--base-directory <BASE_DIRECTORY>", "Directory path used as base directory. The default is the current working directory", CommandOptionType.SingleValue);
             var logLevelOption =            rnxApp.Option("-l|--log <LOG_LEVEL>", $"Value between 2 (most verbose) and 6 (only critical informations). The default is {CommandLineSettings.DEFAULT_LOG_LEVEL}", CommandOptionType.SingleValue);
@@ -93,7 +93,7 @@ namespace Rnx
                 
                 if(logger.IsEnabled(LogLevel.Verbose))
                 {
-                    logger.LogVerbose($"Current dirctory: {currentDirectory}");
+                    logger.LogVerbose($"Current directory: {currentDirectory}");
                     logger.LogVerbose($"Tasks to run: {string.Join(", ", commandLineSettings.TasksToRun)}");
 
                     if (baseDirectoryOption.HasValue())

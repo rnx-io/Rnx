@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Dnx.Compilation;
+using System.Diagnostics;
 
 namespace Rnx.TaskLoader.Compilation
 {
@@ -34,7 +35,8 @@ namespace Rnx.TaskLoader.Compilation
                     var filename = ((IMetadataFileReference)mr).Path;
                     yield return MetadataReference.CreateFromFile(filename);
                 }
-                else if (mr is IMetadataProjectReference)
+#if DEBUG // only relevant when testing Rnx in Debugger, because Rnx is referencing other Rnx-projects like Rnx.Abstractions et al.
+                else if (Debugger.IsAttached && mr is IMetadataProjectReference)
                 {
                     var pr = (IMetadataProjectReference)mr;
 
@@ -44,6 +46,7 @@ namespace Rnx.TaskLoader.Compilation
                         yield return MetadataReference.CreateFromStream(ms);
                     }
                 }
+#endif
             }
         }
     }
