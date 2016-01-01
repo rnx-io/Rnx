@@ -1,10 +1,7 @@
-﻿using Reliak.IO.Abstractions;
-using Rnx.Abstractions.Exceptions;
+﻿using Rnx.Abstractions.Exceptions;
 using Rnx.TaskLoader.Compilation;
-using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -13,26 +10,24 @@ namespace Rnx.TaskLoader
     public class DefaultTaskTypeLoader : ITaskTypeLoader
     {
         private readonly ICodeCompiler _codeCompiler;
-        private readonly IFileSystem _fileSystem;
-        private readonly IGlobMatcher _globMatcher;
+        private readonly ISourceCodeResolver _sourceCodeResolver;
 
-        public DefaultTaskTypeLoader(ICodeCompiler codeCompiler, IFileSystem fileSystem, IGlobMatcher globMatcher)
+        public DefaultTaskTypeLoader(ICodeCompiler codeCompiler, ISourceCodeResolver sourceCodeResolver)
         {
             _codeCompiler = codeCompiler;
-            _fileSystem = fileSystem;
-            _globMatcher = globMatcher;
+            _sourceCodeResolver = sourceCodeResolver;
         }
 
-        public IEnumerable<Type> Load(string baseDirectory, params string[] searchPatterns)
+        public IEnumerable<Type> Load(string taskCodeFilePath)
         {
-            var sourceCodeFilenames = DetermineSourceCodeFilenames(baseDirectory, searchPatterns).ToArray();
+            var codeInfos = _sourceCodeResolver.GetCodeFileInfos(taskCodeFilePath).ToArray();
 
-            if (!sourceCodeFilenames.Any())
+            if (!codeInfos.Any())
             {
-                throw new RnxException($"No source code files were found for '{string.Join(", ", searchPatterns)}'");
+                throw new RnxException($"No source code files were found for '{taskCodeFilePath}'");
             }
             
-            var sourceCodes = sourceCodeFilenames.Select(f => _fileSystem.File.ReadAllText(f)).ToArray();
+            var sourceCodes = codeInfos.Select(f => f.Content).ToArray();
             var compiledAssembly = _codeCompiler.Compile(sourceCodes);
             var taskConfigurationTypes = compiledAssembly.ExportedTypes.Where(f => f.GetTypeInfo().IsPublic && f.GetTypeInfo().IsClass);
 
@@ -42,17 +37,6 @@ namespace Rnx.TaskLoader
             }
 
             return taskConfigurationTypes;
-        }
-
-        private IEnumerable<string> DetermineSourceCodeFilenames(string baseDirectory, params string[] searchPatterns)
-        {
-            // faster version, if no glob pattern is contained in the strings
-            if(searchPatterns.All(f => !f.Contains('*') && !f.Contains('?') && f.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)))
-            {
-                return searchPatterns.Select(f => Path.GetFullPath(Path.Combine(baseDirectory, f)));
-            }
-
-            return _globMatcher.FindMatches(baseDirectory, searchPatterns).Select(f => f.FullPath);
         }
     }
 }

@@ -4,28 +4,72 @@ using Reliak.IO.Abstractions;
 using Rnx.Util.FileSystem;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rnx.TaskLoader
 {
-    public class TaskNameResolver
+    public class SourceCodeResolver : ISourceCodeResolver
     {
-        private readonly IGlobMatcher _globMatcher;
         private readonly IFileSystem _fileSystem;
 
-        public TaskNameResolver(IGlobMatcher globMatcher, IFileSystem fileSystem)
+        public SourceCodeResolver(IFileSystem fileSystem)
         {
-            _globMatcher = globMatcher;
             _fileSystem = fileSystem;
         }
 
-        public IEnumerable<string> FindAvailableTaskNames(string baseDirectory, params string[] searchPatterns)
+        public IEnumerable<CodeFileInfo> GetCodeFileInfos(string taskCodeFilePath)
         {
-            var codeFileFilenames = _globMatcher.FindMatches(baseDirectory, searchPatterns).Select(f => f.FullPath);
+            if (!_fileSystem.File.Exists(taskCodeFilePath))
+            {
+                throw new FileNotFoundException($"Task-file '{taskCodeFilePath}' not found");
+            }
+
+            var code = _fileSystem.File.ReadAllText(taskCodeFilePath).Trim();
+            yield return new CodeFileInfo(taskCodeFilePath, code);
+
+            using (var sr = new StringReader(code))
+            {
+                string line = null;
+
+                while ((line = sr.ReadLine()) != null)
+                {
+                    line = line.Trim();
+
+                    if(line.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (!line.StartsWith("//"))
+                    {
+                        break;
+                    }
+
+                    var includeIndex = line.IndexOf("include");
+
+                    if (includeIndex > -1)
+                    {
+                        var fileToInclude = line.Substring(includeIndex + "include".Length + 1).Trim();
+
+                        if (fileToInclude.Length > 0)
+                        {
+                            foreach (var codeFileInfo in GetCodeFileInfos(fileToInclude))
+                            {
+                                yield return codeFileInfo;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<string> FindAvailableTaskNames(params string[] sourceCodes)
+        {
             var tasks = new List<string>();
 
-            foreach (var code in codeFileFilenames.Select(f => _fileSystem.File.ReadAllText(f)))
+            foreach (var code in sourceCodes)
             {
                 var treeRoot = CSharpSyntaxTree.ParseText(code).GetRoot();
 

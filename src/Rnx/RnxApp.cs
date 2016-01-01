@@ -44,7 +44,7 @@ namespace Rnx
 
             // Load tasks
             var taskTypeLoader = serviceProvider.GetService<ITaskTypeLoader>();
-            var configTypes = taskTypeLoader.Load(_commandLineSettings.BaseDirectory, _commandLineSettings.TaskSourceCodeGlobPaths).ToArray();
+            var configTypes = taskTypeLoader.Load(_commandLineSettings.TaskCodeFilePath).ToArray();
 
             logger.LogVerbose($"Tasks types loaded: {stopWatch.ElapsedMilliseconds} ms");
             stopWatch.Restart();
@@ -92,6 +92,7 @@ namespace Rnx
             services.AddSingleton<LastRunTaskDecorator,LastRunTaskDecorator>()
                     .AddSingleton<ICodeCompiler, DefaultCodeCompiler>()
                     .AddSingleton<IMetaDataReferenceProvider, DefaultMetaDataReferenceProvider>()
+                    .AddSingleton<ISourceCodeResolver, SourceCodeResolver>()
                     .AddSingleton<ITaskLoader, DefaultTaskLoader>()
                     .AddSingleton<ITaskTypeLoader, DefaultTaskTypeLoader>()
                     .AddSingleton<IBufferElementFactory, DefaultBufferElementFactory>()

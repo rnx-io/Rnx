@@ -2,7 +2,7 @@
   "profiles": {
     "Rnx": {
       "commandName": "Rnx",
-      "commandLineArgs": "-f ExampleConfig.cs RunTests -l 1"
+      "commandLineArgs": "-f ExampleConfig.cs SayHello -l 1"
     }
   }
 }

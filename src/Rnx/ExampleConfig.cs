@@ -30,6 +30,7 @@ namespace Rnx
                 new WriteFilesTaskDescriptor("tmp")
             );
 
+
         //public ITaskDescriptor LogTest => new Tasks.DebugTest.BlaTaskDescriptor();
         public ITaskDescriptor LogTest => new LogTaskDescriptor("Hello World!");
 
