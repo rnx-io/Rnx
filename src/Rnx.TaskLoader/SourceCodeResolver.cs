@@ -42,23 +42,20 @@ namespace Rnx.TaskLoader
                         continue;
                     }
 
-                    if (!line.StartsWith("//"))
+                    if (!line.StartsWith("//+"))
                     {
                         break;
                     }
 
-                    var includeIndex = line.IndexOf("include");
+                    var fileToInclude = line.Replace("//+", "").Trim();
 
-                    if (includeIndex > -1)
+                    if (fileToInclude.Length > 0)
                     {
-                        var fileToInclude = line.Substring(includeIndex + "include".Length + 1).Trim();
+                        fileToInclude = Path.IsPathRooted(fileToInclude) ? fileToInclude : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(taskCodeFilePath), fileToInclude));
 
-                        if (fileToInclude.Length > 0)
+                        foreach (var codeFileInfo in GetCodeFileInfos(fileToInclude))
                         {
-                            foreach (var codeFileInfo in GetCodeFileInfos(fileToInclude))
-                            {
-                                yield return codeFileInfo;
-                            }
+                            yield return codeFileInfo;
                         }
                     }
                 }
